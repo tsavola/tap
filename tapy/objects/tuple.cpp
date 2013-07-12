@@ -40,41 +40,43 @@ namespace tapy {
 struct TupleObject::Portable {
 	static size_t Size(uint32_t length) throw ()
 	{
-		return sizeof (Portable) + length * sizeof (Key);
+		return length * sizeof (Key);
+	}
+
+	static bool Check(size_t bufsize) throw ()
+	{
+		return (bufsize % sizeof (Key)) == 0;
+	}
+
+	static size_t Length(size_t bufsize) throw ()
+	{
+		return bufsize / sizeof (Key);
 	}
 
 	const Key *items() const throw ()
 	{
-		return reinterpret_cast<const Key *> (this + 1);
+		return reinterpret_cast<const Key *> (this);
 	}
 
 	Key *items() throw ()
 	{
-		return reinterpret_cast<Key *> (this + 1);
+		return reinterpret_cast<Key *> (this);
 	}
-
-	uint32_t length;
-} TAP_PACKED;
+};
 
 void *TupleObject::UnmarshalAlloc(const void *buf, size_t bufsize)
 {
-	if (bufsize < sizeof (Portable))
+	if (!Portable::Check(bufsize))
 		throw std::out_of_range("unmarshal size");
 
-	auto portable = reinterpret_cast<const Portable *> (buf);
-	uint32_t length = Port(portable->length);
-
-	if (bufsize != Portable::Size(length))
-		throw std::out_of_range("unmarshal size");
-
-	return AllocObject(type, ObjectSize(length));
+	return AllocObject(type, ObjectSize(Portable::Length(bufsize)));
 }
 
-TupleObject::TupleObject(Peer &peer, const void *buf, size_t)
+TupleObject::TupleObject(Peer &peer, const void *buf, size_t bufsize)
 {
 	auto portable = reinterpret_cast<const Portable *> (buf);
 
-	m_length = Port(portable->length);
+	m_length = Portable::Length(bufsize);
 
 	for (uint32_t i = 0; i < m_length; i++)
 		items()[i] = Require<Object>(peer.object(Port(portable->items()[i])));
@@ -97,8 +99,6 @@ size_t TupleObject::marshal_size(Peer &peer) const throw ()
 bool TupleObject::marshal(Peer &peer, void *buf, size_t) const
 {
 	auto portable = reinterpret_cast<Portable *> (buf);
-
-	portable->length = Port(m_length);
 
 	for (uint32_t i = 0; i < m_length; i++)
 		portable->items()[i] = Port(peer.key(items()[i]));
