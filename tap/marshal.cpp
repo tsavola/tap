@@ -39,8 +39,8 @@
 using namespace tap;
 
 struct TapMarshalHeader {
-	TapKey size;
-	TapKey type_id;
+	uint32_t size;
+	uint32_t type_id;
 	TapKey key;
 } TAP_PACKED;
 
