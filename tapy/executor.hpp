@@ -31,11 +31,12 @@
 
 #include <tap.hpp>
 
+class TapyContext;
+
 namespace tapy {
 
 class Callable;
 class CodeObject;
-class Context;
 class DictObject;
 class Executor;
 class Object;
@@ -172,7 +173,7 @@ private:
 	Executor(const Executor &);
 	void operator=(const Executor &);
 
-	Context &m_context;
+	TapyContext &m_context;
 	const CodeObject *m_code;
 	DictObject *const m_dict;
 	bool m_running;

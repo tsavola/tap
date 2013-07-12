@@ -27,6 +27,9 @@
 #ifndef TAPY_CONTEXT_HPP
 #define TAPY_CONTEXT_HPP
 
+#include "api.h"
+#include "tapy.hpp"
+
 #include <cassert>
 
 #include <tap.hpp>
@@ -37,38 +40,38 @@ class BoolObject;
 class NoneObject;
 class Object;
 
-class Context {
+TapyContext &GetContext() throw ();
+
+} // namespace
+
+class TapyContext {
 public:
 	class Internal;
 
-	Context();
-	~Context() throw ();
+	TapyContext();
+	~TapyContext() throw ();
 
 	tap::Instance &instance() throw ()
 	{
 		return m_instance;
 	}
 
-	NoneObject *none() throw ();
+	tapy::NoneObject *none() throw ();
 
-	BoolObject *false_() throw ();
+	tapy::BoolObject *false_() throw ();
 
-	BoolObject *true_() throw ();
+	tapy::BoolObject *true_() throw ();
 
-	Object *load_builtin_name(const Object *name);
+	tapy::Object *load_builtin_name(const tapy::Object *name);
 
-	Object *import_builtin_module(const Object *name);
+	tapy::Object *import_builtin_module(const tapy::Object *name);
 
 private:
-	Context(const Context &);
-	void operator=(const Context &);
+	TapyContext(const TapyContext &);
+	void operator=(const TapyContext &);
 
 	Internal *m_internal;
 	tap::Instance m_instance;
 };
-
-Context &GetContext() throw ();
-
-} // namespace
 
 #endif

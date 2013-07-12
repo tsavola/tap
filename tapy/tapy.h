@@ -41,6 +41,7 @@ TAPY_API int tapy_init(void);
 
 TAPY_API TapyContext *tapy_context_new(void);
 TAPY_API void tapy_context_destroy(TapyContext *context);
+TAPY_API TapInstance *tapy_context_instance(TapyContext *context);
 
 TAPY_API int tapy_execute(const void *data, size_t size);
 

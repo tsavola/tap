@@ -27,9 +27,37 @@
 #ifndef TAPY_TAPY_HPP
 #define TAPY_TAPY_HPP
 
+#include <stdexcept>
+
+#include <tap.hpp>
+
 #include "tapy.h"
 
 namespace tapy {
+
+inline void Init()
+{
+	if (::tapy_init() < 0)
+		throw std::bad_alloc();
+}
+
+class Context: public tap::Resource<TapyContext> {
+public:
+	Context():
+		tap::Resource<TapyContext>(::tapy_context_new())
+	{
+	}
+
+	~Context() throw ()
+	{
+		::tapy_context_destroy(m_resource);
+	}
+
+	::TapInstance *instance() throw ()
+	{
+		return ::tapy_context_instance(m_resource);
+	}
+};
 
 inline void Execute(const void *data, size_t size) throw ()
 {

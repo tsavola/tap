@@ -24,7 +24,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "api.h"
 #include "context.hpp"
 #include "tapy.hpp"
 
@@ -43,6 +42,7 @@
 #include <tapy/system.hpp>
 
 using namespace tap;
+using namespace tapy;
 
 #ifndef TAPY_THREAD_LOCAL
 #define TAPY_THREAD_LOCAL __thread
@@ -50,9 +50,36 @@ using namespace tap;
 
 namespace tapy {
 
-static TAPY_THREAD_LOCAL Context *context;
+static TAPY_THREAD_LOCAL TapyContext *context;
 
-class Context::Internal: boost::noncopyable {
+TapyContext &GetContext() throw ()
+{
+	assert(context);
+	return *context;
+}
+
+// declared in tapy/objects/none.hpp
+
+NoneObject *None() throw ()
+{
+	return GetContext().none();
+}
+
+// declared in tapy/objects/bool.hpp
+
+BoolObject *False() throw ()
+{
+	return GetContext().false_();
+}
+
+BoolObject *True() throw ()
+{
+	return GetContext().true_();
+}
+
+} // namespace
+
+class TapyContext::Internal: boost::noncopyable {
 public:
 	Internal():
 		none(NULL),
@@ -86,7 +113,7 @@ private:
 	}
 };
 
-Context::Context():
+TapyContext::TapyContext():
 	m_instance(InitSystem())
 {
 	assert(context == NULL);
@@ -95,7 +122,7 @@ Context::Context():
 	m_internal = new Internal;
 }
 
-Context::~Context() throw ()
+TapyContext::~TapyContext() throw ()
 {
 	delete m_internal;
 
@@ -103,27 +130,27 @@ Context::~Context() throw ()
 	context = NULL;
 }
 
-NoneObject *Context::none() throw ()
+NoneObject *TapyContext::none() throw ()
 {
 	return m_internal->none;
 }
 
-BoolObject *Context::false_() throw ()
+BoolObject *TapyContext::false_() throw ()
 {
 	return m_internal->false_;
 }
 
-BoolObject *Context::true_() throw ()
+BoolObject *TapyContext::true_() throw ()
 {
 	return m_internal->true_;
 }
 
-Object *Context::load_builtin_name(const Object *name)
+Object *TapyContext::load_builtin_name(const Object *name)
 {
 	return m_internal->builtins->getattribute(name);
 }
 
-Object *Context::import_builtin_module(const Object *name)
+Object *TapyContext::import_builtin_module(const Object *name)
 {
 	auto i = m_internal->modules.find(Require<StrObject>(name)->data());
 	if (i == m_internal->modules.end())
@@ -131,41 +158,17 @@ Object *Context::import_builtin_module(const Object *name)
 	return i->second;
 }
 
-Context &GetContext() throw ()
-{
-	assert(context);
-	return *context;
-}
-
-// declared in tapy/objects/none.hpp
-
-NoneObject *None() throw ()
-{
-	return GetContext().none();
-}
-
-// declared in tapy/objects/bool.hpp
-
-BoolObject *False() throw ()
-{
-	return GetContext().false_();
-}
-
-BoolObject *True() throw ()
-{
-	return GetContext().true_();
-}
-
-} // namespace
-
-using namespace tapy;
-
 TapyContext *tapy_context_new(void)
 {
-	return reinterpret_cast<TapyContext *> (new (std::nothrow) Context);
+	return new (std::nothrow) TapyContext;
 }
 
 void tapy_context_destroy(TapyContext *context)
 {
-	delete reinterpret_cast<Context *> (context);
+	delete context;
+}
+
+TapInstance *tapy_context_instance(TapyContext *context)
+{
+	return context->instance().c_ptr();
 }
