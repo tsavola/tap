@@ -39,7 +39,7 @@ struct TapPeer {
 		{
 		}
 
-		KeyState(uint32_t key, bool dirty) throw ():
+		KeyState(TapKey key, bool dirty) throw ():
 			key(key),
 			dirty(dirty)
 		{
@@ -58,7 +58,7 @@ struct TapPeer {
 			return *this;
 		}
 
-		uint32_t key;
+		TapKey key;
 		bool dirty;
 	};
 
@@ -74,9 +74,9 @@ struct TapPeer {
 		instance.peers.erase(this);
 	}
 
-	uint32_t insert(const void *ptr, bool dirty)
+	TapKey insert(const void *ptr, bool dirty)
 	{
-		uint32_t key = next_key;
+		TapKey key = next_key;
 		next_key += 2;
 
 		key_states[ptr] = TapPeer::KeyState(key, dirty);
@@ -87,8 +87,8 @@ struct TapPeer {
 
 	TapInstance &instance;
 	std::map<const void *, KeyState> key_states;
-	std::map<uint32_t, void *> objects;
-	uint32_t next_key;
+	std::map<TapKey, void *> objects;
+	TapKey next_key;
 };
 
 #endif

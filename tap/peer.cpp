@@ -43,11 +43,11 @@ void tap_peer_destroy(TapPeer *peer)
 	delete peer;
 }
 
-uint32_t tap_peer_key(TapPeer *peer, const void *ptr)
+TapKey tap_peer_key(TapPeer *peer, const void *ptr)
 {
 	assert(ptr);
 
-	uint32_t key = 0;
+	TapKey key = 0;
 
 	if (ptr) {
 		auto i = peer->key_states.find(ptr);
@@ -61,7 +61,7 @@ uint32_t tap_peer_key(TapPeer *peer, const void *ptr)
 	return key;
 }
 
-void *tap_peer_object(TapPeer *peer, uint32_t key)
+void *tap_peer_object(TapPeer *peer, TapKey key)
 {
 	assert(key);
 

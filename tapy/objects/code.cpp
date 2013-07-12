@@ -214,10 +214,10 @@ private:
 
 struct CodeObject::Portable {
 	uint32_t stacksize;
-	uint32_t bytecode;
-	uint32_t consts;
-	uint32_t names;
-	uint32_t varnames;
+	Key bytecode;
+	Key consts;
+	Key names;
+	Key varnames;
 } TAP_PACKED;
 
 CodeObject *CodeObject::Load(const void *void_data, size_t size)

@@ -110,7 +110,7 @@ public:
 	}
 };
 
-// TODO: typedef ::TapKey Key;
+typedef ::TapKey Key;
 
 class Peer: public Resource<TapPeer> {
 public:
@@ -138,9 +138,9 @@ public:
 			::tap_peer_destroy(m_resource);
 	}
 
-	uint32_t key(const void *ptr)
+	Key key(const void *ptr)
 	{
-		uint32_t key = 0;
+		Key key = 0;
 		if (ptr) {
 			key = ::tap_peer_key(m_resource, ptr);
 			if (key == 0)
@@ -149,7 +149,7 @@ public:
 		return key;
 	}
 
-	void *object(uint32_t key)
+	void *object(Key key)
 	{
 		void *ptr = NULL;
 		if (key) {

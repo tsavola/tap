@@ -93,7 +93,7 @@ class Tuple: public ObjectBase<Tuple> {
 		}
 
 		uint32_t portable_length;
-		uint32_t portable_item_keys[0];
+		Key portable_item_keys[0];
 	} TAP_PACKED;
 
 public:

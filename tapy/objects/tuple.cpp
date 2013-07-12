@@ -43,14 +43,14 @@ struct TupleObject::Portable {
 		return sizeof (Portable) + length * sizeof (uint32_t);
 	}
 
-	const uint32_t *items() const throw ()
+	const Key *items() const throw ()
 	{
-		return reinterpret_cast<const uint32_t *> (this + 1);
+		return reinterpret_cast<const Key *> (this + 1);
 	}
 
-	uint32_t *items() throw ()
+	Key *items() throw ()
 	{
-		return reinterpret_cast<uint32_t *> (this + 1);
+		return reinterpret_cast<Key *> (this + 1);
 	}
 
 	uint32_t length;

@@ -40,8 +40,8 @@ using namespace tap;
 namespace tapy {
 
 struct FunctionObject::Portable {
-	uint32_t code;
-	uint32_t name;
+	Key code;
+	Key name;
 } TAP_PACKED;
 
 void *FunctionObject::UnmarshalAlloc(const void *buf, size_t bufsize)

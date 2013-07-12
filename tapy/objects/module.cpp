@@ -38,8 +38,8 @@ using namespace tap;
 namespace tapy {
 
 struct ModuleObject::Portable {
-	uint32_t name;
-	uint32_t dict;
+	Key name;
+	Key dict;
 } TAP_PACKED;
 
 void *ModuleObject::UnmarshalAlloc(const void *buf, size_t bufsize)

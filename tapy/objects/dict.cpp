@@ -39,8 +39,8 @@ namespace tapy {
 
 struct DictObject::Portable {
 	struct Item {
-		uint32_t name;
-		uint32_t value;
+		Key name;
+		Key value;
 	} TAP_PACKED;
 
 	static size_t Size(uint32_t length) throw ()

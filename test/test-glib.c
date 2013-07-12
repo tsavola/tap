@@ -124,7 +124,7 @@ struct TestTuple {
 
 struct TestTupleMarshaled {
 	uint32_t portable_length;
-	uint32_t portable_item_keys[0];
+	TapKey portable_item_keys[0];
 } TAP_PACKED;
 
 typedef struct TestTuple TestTuple;
@@ -149,7 +149,7 @@ static size_t test_tuple_type_marshal_size(const TapType *type, const void *ptr,
 {
 	const TestTuple *object = ptr;
 
-	return sizeof (TestTupleMarshaled) + object->length * sizeof (uint32_t);
+	return sizeof (TestTupleMarshaled) + object->length * sizeof (TapKey);
 }
 
 static bool test_tuple_type_marshal(const TapType *type, const void *ptr, TapPeer *peer, void *buf,
@@ -162,7 +162,7 @@ static bool test_tuple_type_marshal(const TapType *type, const void *ptr, TapPee
 
 	for (uint32_t i = 0; i < object->length; i++)
 		if (object->items[i]) {
-			uint32_t key = tap_peer_key(peer, object->items[i]);
+			TapKey key = tap_peer_key(peer, object->items[i]);
 			if (key == 0)
 				return false;
 
@@ -180,7 +180,7 @@ static void *test_tuple_type_unmarshal_alloc(const TapType *type, const void *da
 	const TestTupleMarshaled *marshaled = data;
 	uint32_t length = tap_port_32(marshaled->portable_length);
 
-	if (size != sizeof (TestTupleMarshaled) + length * sizeof (uint32_t))
+	if (size != sizeof (TestTupleMarshaled) + length * sizeof (TapKey))
 		return NULL;
 
 	return tap_object_alloc(type, sizeof (TestTuple) + length * sizeof (void *));
@@ -195,7 +195,7 @@ static bool test_tuple_type_unmarshal(const TapType *type, void *ptr, TapPeer *p
 	object->length = tap_port_32(marshaled->portable_length);
 
 	for (uint32_t i = 0; i < object->length; i++) {
-		uint32_t key = tap_port_32(marshaled->portable_item_keys[i]);
+		TapKey key = tap_port_32(marshaled->portable_item_keys[i]);
 
 		if (key) {
 			void *item = tap_peer_object(peer, key);

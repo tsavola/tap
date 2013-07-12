@@ -39,9 +39,9 @@
 using namespace tap;
 
 struct TapMarshalHeader {
-	uint32_t size;
-	uint32_t type_id;
-	uint32_t key;
+	TapKey size;
+	TapKey type_id;
+	TapKey key;
 } TAP_PACKED;
 
 struct TapMarshalVisitor {
@@ -64,7 +64,7 @@ struct TapMarshalVisitor {
 		seen.insert(ptr);
 
 		const TapType *type = tap_object_type(ptr);
-		uint32_t key = 0;
+		TapKey key = 0;
 
 		auto i = peer->key_states.find(ptr);
 		if (i != peer->key_states.end()) {
@@ -116,7 +116,7 @@ static void *tap_unmarshal_pass1(TapPeer *peer, const void *data,
 		auto header = reinterpret_cast<const TapMarshalHeader *> (data);
 		uint32_t item_size = Port(header->size);
 		uint32_t item_type_id = Port(header->type_id);
-		uint32_t item_key = Port(header->key);
+		TapKey item_key = Port(header->key);
 
 		if (item_size > size) {
 			std::fprintf(stderr, "unmarshal: header size out of bounds\n");
@@ -173,7 +173,7 @@ static bool tap_unmarshal_pass2(TapPeer *peer, const void *data,
 	while (size >= sizeof (TapMarshalHeader)) {
 		auto header = reinterpret_cast<const TapMarshalHeader *> (data);
 		uint32_t item_size = Port(header->size);
-		uint32_t item_key = Port(header->key);
+		TapKey item_key = Port(header->key);
 
 		size_t marshal_size = item_size - sizeof (TapMarshalHeader);
 		const void *marshal_data = header + 1;

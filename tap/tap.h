@@ -80,7 +80,7 @@ typedef struct TapPeer TapPeer;
 typedef struct TapSystem TapSystem;
 typedef struct TapType TapType;
 
-// TODO: typedef uint32_t TapKey;
+typedef uint32_t TapKey;
 
 typedef bool (*TapVisitFunc)(const void *ptr, void *arg);
 
@@ -112,8 +112,8 @@ TAP_API void tap_instance_destroy(TapInstance *instance);
 
 TAP_API TapPeer *tap_peer_new(TapInstance *instance, bool secondary);
 TAP_API void tap_peer_destroy(TapPeer *peer);
-TAP_API uint32_t tap_peer_key(TapPeer *peer, const void *ptr);
-TAP_API void *tap_peer_object(TapPeer *peer, uint32_t key);
+TAP_API TapKey tap_peer_key(TapPeer *peer, const void *ptr);
+TAP_API void *tap_peer_object(TapPeer *peer, TapKey key);
 
 TAP_API void tap_type_init(TapType *type, TapSystem *system);
 
