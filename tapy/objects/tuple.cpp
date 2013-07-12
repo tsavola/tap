@@ -40,7 +40,7 @@ namespace tapy {
 struct TupleObject::Portable {
 	static size_t Size(uint32_t length) throw ()
 	{
-		return sizeof (Portable) + length * sizeof (uint32_t);
+		return sizeof (Portable) + length * sizeof (Key);
 	}
 
 	const Key *items() const throw ()
