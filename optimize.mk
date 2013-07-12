@@ -1,2 +1,2 @@
-CPPFLAGS	+= -DNDEBUG
-CFLAGS		+= -O3 -fomit-frame-pointer -flto -Wno-unused-variable
+CPPFLAGS	+= -DNDEBUG -DBOOST_DISABLE_ASSERTS
+CFLAGS		+= -Wno-unused-variable -flto

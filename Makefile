@@ -3,7 +3,13 @@
 export PYTHON	:= python3
 
 CPPFLAGS	+= -I. -Iinclude -DBOOST_USE_SEGMENTED_STACKS -DTAPY_TRACE
-CFLAGS		+= -g -Wall -Wextra -Wno-unused-parameter -pthread -fsplit-stack
+CFLAGS		+= -g -Wall -Wextra -Wno-unused-parameter -pthread -fsplit-stack \
+		   -O -fno-cprop-registers -fno-defer-pop -fno-split-wide-types -fno-tree-bit-ccp \
+		      -fno-tree-ch -fno-tree-copyrename -fno-tree-dominator-opts -fno-tree-forwprop \
+		      -fno-tree-fre -fno-tree-phiprop -fno-tree-pta -fno-tree-sra -fno-tree-ter \
+		   -fcaller-saves -fdelete-null-pointer-checks -fdevirtualize -findirect-inlining \
+		   -finline-functions -fipa-cp-clone -foptimize-sibling-calls -fpartial-inlining \
+		   -fpeephole2
 CCFLAGS		+= -std=c99
 CXXFLAGS	+= -std=c++0x
 
