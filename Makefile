@@ -1,32 +1,37 @@
 -include config.mk
 
-export PYTHON	:= python3
+TARGET	:= env/lib/python3.4/site-packages/tap/__init__.py
+SOURCES	:= $(wildcard tap/*.py tap/core/*.cpp tap/core/*.hpp)
 
-CPPFLAGS	+= -I. -Iinclude -DBOOST_USE_SEGMENTED_STACKS -DTAPY_TRACE
-CFLAGS		+= -g -Wall -Wextra -Wno-unused-parameter -pthread -fsplit-stack \
-		   -O -fno-cprop-registers -fno-defer-pop -fno-split-wide-types -fno-tree-bit-ccp \
-		      -fno-tree-ch -fno-tree-copyrename -fno-tree-dominator-opts -fno-tree-forwprop \
-		      -fno-tree-fre -fno-tree-phiprop -fno-tree-pta -fno-tree-sra -fno-tree-ter \
-		   -fcaller-saves -fdelete-null-pointer-checks -fdevirtualize -findirect-inlining \
-		   -finline-functions -fipa-cp-clone -foptimize-sibling-calls -fpartial-inlining \
-		   -fpeephole2
-CCFLAGS		+= -std=c99
-CXXFLAGS	+= -std=c++0x
+build:: $(TARGET)
 
-ifneq ($(BOOST),)
-CPPFLAGS	+= -I$(BOOST)/include
-LDFLAGS		+= -L$(BOOST)/lib
-endif
+test:: build
+	cp test.py env/lib/
+	. env/bin/activate && cd env && python -B lib/test.py 1 data
+	. env/bin/activate && cd env && python -B lib/test.py 2 data
 
-LIBRARIES	:= tap tapy
-TESTS		:= test/glib test/c++ test/tapy example
+$(TARGET): env/bin/activate $(SOURCES)
+	. env/bin/activate && CFLAGS="-std=c++0x" python setup.py clean install
+	touch $@
 
-build: $(TESTS)
+env/bin/activate: cpython/python
+	cpython/python -m venv --clear --without-pip env
 
-test/glib: tap-static
-test/c++: tap-static
-test/tapy: tapy-static
+cpython/python: cpython/Makefile
+	$(MAKE) -C cpython -j$(J)
 
-example: tap-static tapy-static
+cpython/Makefile: cpython/configure
+	- $(MAKE) -C cpython distclean
+	cd cpython && ./configure CFLAGS="-std=c99"
 
-include build/project.mk
+cpython/configure:
+	git submodule update --init --recursive
+
+clean::
+	- python3 setup.py clean
+	rm -rf env build
+	- $(MAKE) -C cpython clean
+	- rm -f cpython/python
+
+purge:: clean
+	- $(MAKE) -C cpython distclean
