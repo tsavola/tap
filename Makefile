@@ -11,7 +11,7 @@ test:: build
 	. env/bin/activate && cd env && python -B lib/test.py 2 data
 
 $(TARGET): env/bin/activate $(SOURCES)
-	. env/bin/activate && CFLAGS="-std=c++0x" python setup.py clean install
+	. env/bin/activate && CFLAGS="-std=c++11" python setup.py clean install
 	touch $@
 
 env/bin/activate: cpython/python
