@@ -36,7 +36,7 @@ static int list_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject
 static PyObject *list_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
 {
 	if (size % sizeof (Key))
-		return NULL;
+		return nullptr;
 
 	return PyList_New(size / sizeof (Key));
 }
@@ -47,7 +47,7 @@ static int list_unmarshal_init(PyObject *object, const void *data, Py_ssize_t si
 
 	for (Py_ssize_t i = 0; i < PyList_GET_SIZE(object); ++i) {
 		PyObject *item = peer.object(port(portable[i]));
-		if (item == NULL)
+		if (item == nullptr)
 			return -1;
 
 		Py_INCREF(item);
@@ -77,13 +77,13 @@ static int list_unmarshal_update(PyObject *object, const void *data, Py_ssize_t 
 		refs.push_back(item);
 	}
 
-	PyList_SetSlice(object, 0, PyList_GET_SIZE(object), NULL);
+	PyList_SetSlice(object, 0, PyList_GET_SIZE(object), nullptr);
 
 	Py_ssize_t length = size / sizeof (Key);
 
 	for (Py_ssize_t i = 0; i < length; ++i) {
 		PyObject *item = peer.object(port(portable[i]));
-		if (item == NULL)
+		if (item == nullptr)
 			return -1;
 
 		if (PyList_Append(object, item) < 0)

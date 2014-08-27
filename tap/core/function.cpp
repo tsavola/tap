@@ -79,18 +79,18 @@ static int function_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerOb
 static PyObject *function_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
 {
 	if (size != sizeof (Portable))
-		return NULL;
+		return nullptr;
 
 	return reinterpret_cast<PyObject *> (PyObject_GC_New(PyFunctionObject, &PyFunction_Type));
 }
 
 #define TAP_FUNCTION_UNMARSHAL_KEY(NAME) \
 	do { \
-		PyObject *ptr = NULL; \
+		PyObject *ptr = nullptr; \
 		Key key = port(portable->NAME); \
 		if (key != -1) { \
 			ptr = peer.object(key); \
-			if (ptr == NULL) { \
+			if (ptr == nullptr) { \
 				fprintf(stderr, "tap function unmarshal: " #NAME " lookup error\n"); \
 				return -1; \
 			} \

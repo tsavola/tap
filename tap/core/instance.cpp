@@ -13,7 +13,7 @@ static Instance *instance;
 int instance_init()
 {
 	instance = new (std::nothrow) Instance;
-	if (instance == NULL)
+	if (instance == nullptr)
 		return -1;
 
 	return 0;

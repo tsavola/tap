@@ -33,7 +33,7 @@ static int tuple_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObjec
 static PyObject *tuple_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
 {
 	if (size % sizeof (Key))
-		return NULL;
+		return nullptr;
 
 	return PyTuple_New(size / sizeof (Key));
 }
@@ -44,7 +44,7 @@ static int tuple_unmarshal_init(PyObject *object, const void *data, Py_ssize_t s
 
 	for (Py_ssize_t i = 0; i < PyTuple_GET_SIZE(object); ++i) {
 		PyObject *item = peer.object(port(portable[i]));
-		if (item == NULL)
+		if (item == nullptr)
 			return -1;
 
 		Py_INCREF(item);

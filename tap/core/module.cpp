@@ -59,13 +59,13 @@ static int module_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObje
 static PyObject *module_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
 {
 	if (size <= Py_ssize_t(sizeof (Portable)))
-		return NULL;
+		return nullptr;
 
 	const Portable *portable = reinterpret_cast<const Portable *> (data);
 
 	PyObject *name = PyUnicode_FromStringAndSize(portable->name(), size - sizeof (Portable));
-	if (name == NULL)
-		return NULL;
+	if (name == nullptr)
+		return nullptr;
 
 	PyObject *object = PyModule_NewObject(name);
 	Py_DECREF(name);
@@ -79,7 +79,7 @@ static int module_unmarshal_init(PyObject *object, const void *data, Py_ssize_t 
 	const Portable *portable = reinterpret_cast<const Portable *> (data);
 
 	PyObject *new_dict = peer.object(port(portable->dict));
-	if (new_dict == NULL)
+	if (new_dict == nullptr)
 		return -1;
 
 	PyObject *old_dict = module->md_dict;

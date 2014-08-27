@@ -105,14 +105,14 @@ static int code_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject
 static PyObject *code_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
 {
 	if (size < Py_ssize_t(sizeof (Portable)))
-		return NULL;
+		return nullptr;
 
 	return reinterpret_cast<PyObject *> (PyObject_NEW(PyCodeObject, &PyCode_Type));
 }
 
 #define TAP_CODE_UNMARSHAL_KEY(NAME) \
 	codeobject->co_##NAME = peer.object(port(portable->NAME)); \
-	if (codeobject->co_##NAME == NULL) \
+	if (codeobject->co_##NAME == nullptr) \
 		return -1; \
 	Py_INCREF(codeobject->co_##NAME)
 
@@ -135,13 +135,13 @@ static int code_unmarshal_init(PyObject *object, const void *data, Py_ssize_t si
 	TAP_CODE_UNMARSHAL_KEY(varnames);
 	TAP_CODE_UNMARSHAL_KEY(freevars);
 	TAP_CODE_UNMARSHAL_KEY(cellvars);
-	codeobject->co_cell2arg = NULL;
+	codeobject->co_cell2arg = nullptr;
 	TAP_CODE_UNMARSHAL_KEY(filename);
 	TAP_CODE_UNMARSHAL_KEY(name);
 	TAP_CODE_UNMARSHAL_VALUE(firstlineno);
 	TAP_CODE_UNMARSHAL_KEY(lnotab);
-	codeobject->co_zombieframe = NULL;
-	codeobject->co_weakreflist = NULL;
+	codeobject->co_zombieframe = nullptr;
+	codeobject->co_weakreflist = nullptr;
 
 	if (codeobject->co_argcount < 0 ||
 	    codeobject->co_kwonlyargcount < 0 ||
@@ -164,7 +164,7 @@ static int code_unmarshal_init(PyObject *object, const void *data, Py_ssize_t si
 			return -1;
 
 		codeobject->co_cell2arg = reinterpret_cast<uint8_t *> (PyMem_MALLOC(cell2arg_size));
-		if (codeobject->co_cell2arg == NULL)
+		if (codeobject->co_cell2arg == nullptr)
 			return -1;
 
 		memcpy(codeobject->co_cell2arg, portable->cell2arg(), cell2arg_size);

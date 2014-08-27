@@ -21,7 +21,7 @@ static int bool_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject
 static PyObject *bool_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
 {
 	if (size != sizeof (uint8_t))
-		return NULL;
+		return nullptr;
 
 	return PyBool_FromLong(port(*reinterpret_cast<const uint8_t *> (data)));
 }

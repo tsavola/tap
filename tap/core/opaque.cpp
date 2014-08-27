@@ -24,7 +24,7 @@ int opaque_type_init()
 }
 
 PyTypeObject opaque_type = {
-	PyVarObject_HEAD_INIT(NULL, 0)
+	PyVarObject_HEAD_INIT(nullptr, 0)
 	"tap.core.Opaque",              /* tp_name */
 	sizeof (OpaqueObject),          /* tp_basicsize */
 	0,                              /* tp_itemsize */
@@ -44,7 +44,7 @@ PyTypeObject opaque_type = {
 	0,                              /* tp_setattro */
 	0,                              /* tp_as_buffer */
 	Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,  /* tp_flags */
-	NULL,                           /* tp_doc */
+	nullptr,                           /* tp_doc */
 	0,                              /* tp_traverse */
 	0,                              /* tp_clear */
 	0,                              /* tp_richcompare */

@@ -30,7 +30,7 @@ static PyObject *unicode_unmarshal_alloc(const void *data, Py_ssize_t size, Peer
 {
 	if (!unicode_verify_utf8(data, size)) {
 		fprintf(stderr, "tap unicode unmarshal: bad UTF-8\n");
-		return NULL;
+		return nullptr;
 	}
 
 	return PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, data, size);

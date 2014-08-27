@@ -110,7 +110,7 @@ Key PeerObject::key(PyObject *object)
 
 PyObject *PeerObject::object(Key key)
 {
-	PyObject *object = NULL;
+	PyObject *object = nullptr;
 
 	auto i = objects.find(key);
 	if (i != objects.end()) {
@@ -118,7 +118,7 @@ PyObject *PeerObject::object(Key key)
 
 		if (object->ob_refcnt <= 0) {
 			fprintf(stderr, "tap peer: %s object %p with invalid reference count %ld during lookup\n", object->ob_type->tp_name, object, object->ob_refcnt);
-			object = NULL;
+			object = nullptr;
 		}
 	}
 
@@ -150,7 +150,7 @@ extern "C" {
 				new (peer) PeerObject;
 			} catch (std::bad_alloc) {
 				type->tp_free(peer);
-				peer = NULL;
+				peer = nullptr;
 			}
 		}
 
@@ -170,7 +170,7 @@ int peer_type_init()
 }
 
 PyTypeObject peer_type = {
-	PyVarObject_HEAD_INIT(NULL, 0)
+	PyVarObject_HEAD_INIT(nullptr, 0)
 	"tap.core.Peer",                /* tp_name */
 	sizeof (PeerObject),            /* tp_basicsize */
 	0,                              /* tp_itemsize */
@@ -190,7 +190,7 @@ PyTypeObject peer_type = {
 	0,                              /* tp_setattro */
 	0,                              /* tp_as_buffer */
 	Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,  /* tp_flags */
-	NULL,                           /* tp_doc */
+	nullptr,                           /* tp_doc */
 	0,                              /* tp_traverse */
 	0,                              /* tp_clear */
 	0,                              /* tp_richcompare */

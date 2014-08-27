@@ -27,7 +27,7 @@ static int type_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject
 static PyObject *type_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
 {
 	if (size != sizeof (Portable))
-		return NULL;
+		return nullptr;
 
 	const Portable *portable = reinterpret_cast<const Portable *> (data);
 	return reinterpret_cast<PyObject *> (type_object_for_id(port(portable->type_id)));
@@ -92,7 +92,7 @@ const TypeHandler *type_handler_for_id(int32_t type_id)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 PyTypeObject *type_object_for_id(int32_t type_id)
@@ -117,7 +117,7 @@ PyTypeObject *type_object_for_id(int32_t type_id)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 } // namespace tap

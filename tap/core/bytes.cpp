@@ -22,7 +22,7 @@ static int bytes_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObjec
 
 static PyObject *bytes_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
 {
-	return PyBytes_FromStringAndSize(NULL, size);
+	return PyBytes_FromStringAndSize(nullptr, size);
 }
 
 static int bytes_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer)

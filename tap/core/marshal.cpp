@@ -106,7 +106,7 @@ struct Unmarshaler {
 
 	PyObject *alloc(PeerObject &peer, const void *data, Py_ssize_t size)
 	{
-		PyObject *root = NULL;
+		PyObject *root = nullptr;
 
 		while (size >= Py_ssize_t(sizeof (Header))) {
 			const Header *header = reinterpret_cast<const Header *> (data);
@@ -116,13 +116,13 @@ struct Unmarshaler {
 
 			if (item_size > size) {
 				fprintf(stderr, "tap unmarshal: header size out of bounds\n");
-				return NULL;
+				return nullptr;
 			}
 
 			const TypeHandler *handler = type_handler_for_id(item_type_id);
-			if (handler == NULL) {
+			if (handler == nullptr) {
 				fprintf(stderr, "tap unmarshal: object type id is unknown\n");
-				return NULL;
+				return nullptr;
 			}
 
 			Py_ssize_t marshal_size = item_size - sizeof (Header);
@@ -130,29 +130,29 @@ struct Unmarshaler {
 
 			PyObject *object = peer.object(item_key);
 			if (object) {
-				if (handler->unmarshal_update == NULL) {
+				if (handler->unmarshal_update == nullptr) {
 					fprintf(stderr, "tap unmarshal: update of immutable object\n");
-					return NULL;
+					return nullptr;
 				}
 
 				peer.clear(object);
 			} else {
 				object = handler->unmarshal_alloc(marshal_data, marshal_size, peer);
-				if (object == NULL) {
+				if (object == nullptr) {
 					fprintf(stderr, "tap unmarshal: allocation failed (type_id=%d)\n", item_type_id);
-					return NULL;
+					return nullptr;
 				}
 
 				try {
 					created.insert(object);
 				} catch (std::bad_alloc) {
-					return NULL;
+					return nullptr;
 				}
 
 				peer.insert(object, item_key);
 			}
 
-			if (root == NULL)
+			if (root == nullptr)
 				root = object;
 
 			data = reinterpret_cast<const char *> (data) + item_size;
@@ -161,7 +161,7 @@ struct Unmarshaler {
 
 		if (size > 0) {
 			fprintf(stderr, "tap unmarshal: trailing garbage or truncated data\n");
-			return NULL;
+			return nullptr;
 		}
 
 		return root;
@@ -209,11 +209,11 @@ PyObject *unmarshal(PeerObject &peer, const void *data, Py_ssize_t size)
 	Unmarshaler unmarshaler;
 
 	PyObject *root = unmarshaler.alloc(peer, data, size);
-	if (root == NULL)
-		return NULL;
+	if (root == nullptr)
+		return nullptr;
 
 	if (unmarshaler.init(peer, data, size, false) < 0 || unmarshaler.init(peer, data, size, true) < 0)
-		return NULL;
+		return nullptr;
 
 	Py_INCREF(root);
 	return root;

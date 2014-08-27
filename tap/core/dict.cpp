@@ -56,7 +56,7 @@ static int dict_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject
 static PyObject *dict_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
 {
 	if (size % sizeof (Item))
-		return NULL;
+		return nullptr;
 
 	return PyDict_New();
 }
@@ -70,11 +70,11 @@ static int dict_unmarshal_init(PyObject *object, const void *data, Py_ssize_t si
 		const Item &item = portable[i];
 
 		PyObject *key = peer.object(port(item.key));
-		if (key == NULL)
+		if (key == nullptr)
 			return -1;
 
 		PyObject *value = peer.object(port(item.value));
-		if (value == NULL)
+		if (value == nullptr)
 			return -1;
 
 		if (PyDict_SetItem(object, key, value) < 0)
@@ -97,11 +97,11 @@ static int dict_unmarshal_update(PyObject *object, const void *data, Py_ssize_t 
 		const Item &item = portable[i];
 
 		PyObject *key = peer.object(port(item.key));
-		if (key == NULL)
+		if (key == nullptr)
 			return -1;
 
 		PyObject *value = peer.object(port(item.value));
-		if (value == NULL)
+		if (value == nullptr)
 			return -1;
 
 		if (PyDict_SetItem(object, key, value) < 0)

@@ -52,40 +52,40 @@ static int builtin_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObj
 static PyObject *builtin_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
 {
 	if (size < 4)
-		return NULL;
+		return nullptr;
 
 	const char *portable = reinterpret_cast<const char *> (data);
 	if (portable[size - 1] != '\0')
-		return NULL;
+		return nullptr;
 
 	const char *module = portable;
 	size_t modulesize = strlen(module) + 1;
 
 	if (!unicode_verify_utf8(module, modulesize)) {
 		fprintf(stderr, "tap builtin unmarshal: module name contains bad UTF-8\n");
-		return NULL;
+		return nullptr;
 	}
 
 	const char *name = module + modulesize;
 	size_t namesize = size - modulesize;
 
 	if (namesize == 0 || strlen(name) != namesize - 1)
-		return NULL;
+		return nullptr;
 
 	if (!unicode_verify_utf8(name, namesize)) {
 		fprintf(stderr, "tap builtin unmarshal: builtin name contains bad UTF-8\n");
-		return NULL;
+		return nullptr;
 	}
 
 	PyObject *mod = PyImport_ImportModule(module);
-	if (mod == NULL) {
+	if (mod == nullptr) {
 		fprintf(stderr, "tap builtin unmarshal: failed to import module %s\n", module);
-		return NULL;
+		return nullptr;
 	}
 
 	PyObject *object = PyDict_GetItemString(PyModule_GetDict(mod), name);
-	if (object == NULL)
-		return NULL;
+	if (object == nullptr)
+		return nullptr;
 
 	Py_INCREF(object);
 	Py_DECREF(mod);

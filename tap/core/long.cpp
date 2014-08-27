@@ -21,7 +21,7 @@ static int long_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject
 static PyObject *long_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
 {
 	if (size != sizeof (int64_t))
-		return NULL;
+		return nullptr;
 
 	return PyLong_FromLongLong(port(*reinterpret_cast<const int64_t *> (data)));
 }
