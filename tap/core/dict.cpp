@@ -129,8 +129,8 @@ static int dict_unmarshal_update(PyObject *object, const void *data, Py_ssize_t 
 		}
 	}
 
-	for (auto i = excluded_keys.begin(); i != excluded_keys.end(); ++i)
-		PyDict_DelItem(object, *i);
+	for (PyObject *key: excluded_keys)
+		PyDict_DelItem(object, key);
 
 	return 0;
 }

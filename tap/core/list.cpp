@@ -90,8 +90,8 @@ static int list_unmarshal_update(PyObject *object, const void *data, Py_ssize_t 
 			return -1;
 	}
 
-	for (auto i = refs.begin(); i != refs.end(); ++i)
-		Py_DECREF(*i);
+	for (PyObject *item: refs)
+		Py_DECREF(item);
 
 	return 0;
 }

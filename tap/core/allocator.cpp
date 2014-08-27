@@ -7,10 +7,8 @@ extern "C" {
 
 	static void object_free_wrapper(void *ctx, void *ptr)
 	{
-		auto &peers = instance_peers();
-
-		for (auto i = peers.begin(); i != peers.end(); ++i)
-			(*i)->object_freed(ptr);
+		for (PeerObject *peer: instance_peers())
+			peer->object_freed(ptr);
 
 		original_object_free(ctx, ptr);
 	}

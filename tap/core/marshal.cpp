@@ -100,8 +100,8 @@ struct Unmarshaler {
 
 	~Unmarshaler()
 	{
-		for (auto i = created.begin(); i != created.end(); ++i)
-			Py_DECREF(*i);
+		for (PyObject *object: created)
+			Py_DECREF(object);
 	}
 
 	PyObject *alloc(PeerObject &peer, const void *data, Py_ssize_t size)
