@@ -133,6 +133,8 @@ PyObject *unmarshal(PeerObject &peer, const void *data, Py_ssize_t size);
 
 void allocator_init();
 
+bool unicode_verify_utf8(const void *data, Py_ssize_t size);
+
 #if TAP_PORTABLE_BYTEORDER
 
 template <typename T> inline T port(T x) throw () { return x; }

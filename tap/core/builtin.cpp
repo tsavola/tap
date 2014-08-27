@@ -25,7 +25,11 @@ static Py_ssize_t builtin_marshaled_size(PyObject *object)
 {
 	PyCFunctionObject *builtin = reinterpret_cast<PyCFunctionObject *> (object);
 
-	// TODO: ensure UTF-8
+	if (PyUnicode_KIND(builtin->m_module) != PyUnicode_1BYTE_KIND) {
+		fprintf(stderr, "tap builtin marshal: module name is unsupported kind of unicode (%d)\n", PyUnicode_KIND(builtin->m_module));
+		return -1;
+	}
+
 	const char *module = reinterpret_cast<const char *> (PyUnicode_DATA(builtin->m_module));
 
 	return strlen(module) + 1 + strlen(builtin->m_ml->ml_name) + 1;
@@ -57,15 +61,25 @@ static PyObject *builtin_unmarshal_alloc(const void *data, Py_ssize_t size, Peer
 	const char *module = portable;
 	size_t modulesize = strlen(module) + 1;
 
+	if (!unicode_verify_utf8(module, modulesize)) {
+		fprintf(stderr, "tap builtin unmarshal: module name contains bad UTF-8\n");
+		return NULL;
+	}
+
 	const char *name = module + modulesize;
 	size_t namesize = size - modulesize;
 
 	if (namesize == 0 || strlen(name) != namesize - 1)
 		return NULL;
 
+	if (!unicode_verify_utf8(name, namesize)) {
+		fprintf(stderr, "tap builtin unmarshal: builtin name contains bad UTF-8\n");
+		return NULL;
+	}
+
 	PyObject *mod = PyImport_ImportModule(module);
 	if (mod == NULL) {
-		fprintf(stderr, "builtin_unmarshal_alloc: failed to import module %s\n", module);
+		fprintf(stderr, "tap builtin unmarshal: failed to import module %s\n", module);
 		return NULL;
 	}
 

@@ -28,6 +28,21 @@ static int unicode_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObj
 
 static PyObject *unicode_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
 {
+	if (!unicode_verify_utf8(data, size)) {
+		fprintf(stderr, "tap unicode unmarshal: bad UTF-8\n");
+		return NULL;
+	}
+
+	return PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, data, size);
+}
+
+static int unicode_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer)
+{
+	return 0;
+}
+
+bool unicode_verify_utf8(const void *data, Py_ssize_t size)
+{
 	const uint8_t *bytes = reinterpret_cast<const uint8_t *> (data);
 	Py_ssize_t i = 0;
 
@@ -44,34 +59,22 @@ static PyObject *unicode_unmarshal_alloc(const void *data, Py_ssize_t size, Peer
 			} else if ((byte & 0xf8) == 0xf0) {
 				skip = 3;
 			} else {
-				fprintf(stderr, "tap unicode unmarshal: bad UTF-8\n");
-				return NULL;
+				return false;
 			}
 
 			Py_ssize_t next = i + skip;
-
-			if (next > size) {
-				fprintf(stderr, "tap unicode unmarshal: bad UTF-8\n");
-				return NULL;
-			}
+			if (next > size)
+				return false;
 
 			for (; i < next; i++) {
 				byte = bytes[i];
-
-				if ((byte & 0xc0) != 0x80) {
-					fprintf(stderr, "tap unicode unmarshal: bad UTF-8\n");
-					return NULL;
-				}
+				if ((byte & 0xc0) != 0x80)
+					return false;
 			}
 		}
 	}
 
-	return PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, data, size);
-}
-
-static int unicode_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer)
-{
-	return 0;
+	return true;
 }
 
 const TypeHandler unicode_type_handler = {
