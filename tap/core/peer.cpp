@@ -4,34 +4,48 @@
 
 namespace tap {
 
-class PeerObject::State
-{
-public:
-	State() noexcept
+struct PeerObject::State {
+	enum {
+		DIRTY_FLAG     = 1 << 0,
+		REFERENCE_FLAG = 1 << 1,
+	};
+
+	State() noexcept:
+		key(-1),
+		flags(0)
 	{
 	}
 
-	State(Key key, bool dirty) noexcept:
+	State(Key key, unsigned int flags) noexcept:
 		key(key),
-		dirty(dirty)
-	{
-	}
-
-	State(const State &other) noexcept:
-		key(other.key),
-		dirty(other.dirty)
+		flags(flags)
 	{
 	}
 
 	State &operator=(const State &other) noexcept
 	{
 		key = other.key;
-		dirty = other.dirty;
+		flags = other.flags;
 		return *this;
 	}
 
+	void set_flag(unsigned int mask) noexcept
+	{
+		flags |= mask;
+	}
+
+	void clear_flag(unsigned int mask) noexcept
+	{
+		flags &= ~mask;
+	}
+
+	bool test_flag(unsigned int mask) const noexcept
+	{
+		return flags & mask;
+	}
+
 	Key key;
-	bool dirty;
+	unsigned int flags;
 };
 
 PeerObject::PeerObject():
@@ -43,12 +57,17 @@ PeerObject::PeerObject():
 PeerObject::~PeerObject()
 {
 	instance_peers().erase(this);
+
+	for (auto pair: states) {
+		if (pair.second.test_flag(State::REFERENCE_FLAG))
+			Py_DECREF(pair.first);
+	}
 }
 
 int PeerObject::insert(PyObject *object, Key key, bool dirty) noexcept
 {
 	try {
-		states[object] = State(key, dirty);
+		states[object] = State(key, dirty ? State::DIRTY_FLAG : 0);
 	} catch (...) {
 		return -1;
 	}
@@ -78,19 +97,16 @@ Key PeerObject::insert_new(PyObject *object, bool dirty) noexcept
 void PeerObject::clear(PyObject *object) noexcept
 {
 	auto i = states.find(object);
-	if (i != states.end() && i->second.dirty)
-		i->second.dirty = false;
+	if (i != states.end())
+		i->second.clear_flag(State::DIRTY_FLAG);
 }
 
 std::pair<Key, bool> PeerObject::insert_or_clear(PyObject *object) noexcept
 {
 	auto i = states.find(object);
 	if (i != states.end()) {
-		bool was_dirty = false;
-		if (i->second.dirty) {
-			i->second.dirty = false;
-			was_dirty = true;
-		}
+		bool was_dirty = i->second.test_flag(State::DIRTY_FLAG);
+		i->second.clear_flag(State::DIRTY_FLAG);
 		return std::make_pair(i->second.key, was_dirty);
 	} else {
 		Key key = insert_new(object, false);
@@ -129,7 +145,13 @@ void PeerObject::touch(PyObject *object) noexcept
 {
 	auto i = states.find(object);
 	if (i != states.end())
-		i->second.dirty = true;
+		i->second.set_flag(State::DIRTY_FLAG);
+}
+
+void PeerObject::set_references(const std::unordered_set<PyObject *> &referenced) noexcept
+{
+	for (PyObject *object: referenced)
+		states.find(object)->second.set_flag(State::REFERENCE_FLAG);
 }
 
 void PeerObject::object_freed(void *ptr) noexcept
@@ -143,8 +165,12 @@ void PeerObject::object_freed(void *ptr) noexcept
 		if (object->ob_refcnt != 0)
 			fprintf(stderr, "tap peer: %s object %p with unexpected reference count %ld when freed\n", object->ob_type->tp_name, object, object->ob_refcnt);
 
-		objects.erase(i->second.key);
+		Key key = i->second.key;
+
+		objects.erase(key);
 		states.erase(i);
+
+		freed.push_back(key);
 	}
 }
 

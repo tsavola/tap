@@ -10,9 +10,9 @@ static PyObject *marshal_py(PyObject *self, PyObject *args) noexcept
 	PyObject *result = nullptr;
 	PyObject *peer;
 	PyObject *bytearray;
-	PyObject *object;
+	PyObject *object = nullptr;
 
-	if (PyArg_ParseTuple(args, "O!O!O", &peer_type, &peer, &PyByteArray_Type, &bytearray, &object)) {
+	if (PyArg_ParseTuple(args, "O!O!|O", &peer_type, &peer, &PyByteArray_Type, &bytearray, &object)) {
 		if (marshal(*reinterpret_cast <PeerObject *>(peer), bytearray, object) == 0) {
 			Py_INCREF(Py_None);
 			result = Py_None;

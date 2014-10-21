@@ -7,6 +7,7 @@
 #include <map>
 #include <unordered_set>
 #include <utility>
+#include <vector>
 
 namespace tap {
 
@@ -43,10 +44,13 @@ struct PeerObject {
 	Key key(PyObject *object) noexcept;
 	PyObject *object(Key key) noexcept;
 	void touch(PyObject *object) noexcept;
+	void set_references(const std::unordered_set<PyObject *> &referenced) noexcept;
 	void object_freed(void *ptr) noexcept;
 
+	std::vector<Key> freed;
+
 private:
-	class State;
+	struct State;
 
 	PeerObject(const PeerObject &);
 	void operator=(const PeerObject &);
