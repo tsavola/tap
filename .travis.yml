@@ -1,5 +1,7 @@
 language: python
 python:
   - "3.4"
-install: "CFLAGS=-std=c++11 python setup.py install"
+env:
+  - CFLAGS=-std=c++11
+install: "python setup.py install"
 script: "python -B test.py 1 data && python -B test.py 2 data"
