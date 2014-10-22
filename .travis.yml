@@ -2,6 +2,6 @@ language: python
 python:
   - "3.4"
 env:
-  - CFLAGS=-std=c++11
+  - CFLAGS=-std=c++0x
 install: "python setup.py install"
 script: "python -B test.py 1 data && python -B test.py 2 data"
