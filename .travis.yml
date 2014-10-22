@@ -4,4 +4,4 @@ python:
 env:
   - CFLAGS=-std=c++0x
 install: "python setup.py install"
-script: "mkdir tmp && cd tmp && python ../test.py 1 data && python ../test.py 2 data"
+script: "mkdir tmp && cp test.py tmp/ && cd tmp && python test.py 1 data && python test.py 2 data"
