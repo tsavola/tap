@@ -1,7 +1,5 @@
 import sys
 
-sys.path.remove("")
-
 import tap
 import tap.core
 
