@@ -1,4 +1,5 @@
 #include "core.hpp"
+#include "portable.hpp"
 
 #include <stdexcept>
 #include <unordered_set>

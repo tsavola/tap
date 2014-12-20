@@ -1,5 +1,5 @@
-#ifndef TAP_CORE_TAP_HPP
-#define TAP_CORE_TAP_HPP
+#ifndef TAP_CORE_CORE_HPP
+#define TAP_CORE_CORE_HPP
 
 #include <Python.h>
 
@@ -9,37 +9,6 @@
 #include <stdexcept>
 #include <unordered_set>
 #include <utility>
-
-#ifndef TAP_PORTABLE_BYTEORDER
-# ifdef __linux__
-#  include <endian.h>
-# else
-#  include <sys/types.h>
-# endif
-# if defined(BYTE_ORDER)
-#  if BYTE_ORDER == LITTLE_ENDIAN
-#   define TAP_PORTABLE_BYTEORDER true
-#  else
-#   define TAP_PORTABLE_BYTEORDER false
-#  endif
-# elif defined(__BYTE_ORDER)
-#  if __BYTE_ORDER == __LITTLE_ENDIAN
-#   define TAP_PORTABLE_BYTEORDER true
-#  else
-#   define TAP_PORTABLE_BYTEORDER false
-#  endif
-# elif defined(__APPLE__)
-#  if defined(__LITTLE_ENDIAN__)
-#   define TAP_PORTABLE_BYTEORDER true
-#  else
-#   define TAP_PORTABLE_BYTEORDER false
-#  endif
-# else
-#  error cannot figure out byteorder
-# endif
-#endif
-
-#define TAP_PACKED  __attribute__ ((packed))
 
 namespace tap {
 
@@ -60,6 +29,7 @@ enum TypeId {
 	FUNCTION_TYPE_ID  = 11,
 	MODULE_TYPE_ID    = 12,
 	BUILTIN_TYPE_ID   = 13,
+
 	TYPE_ID_COUNT
 };
 
@@ -89,9 +59,6 @@ private:
 	Key next_key;
 };
 
-int peer_type_init() noexcept;
-extern PyTypeObject peer_type;
-
 struct TypeHandler {
 	int32_t type_id;
 	int (*traverse)(PyObject *object, visitproc visit, void *arg) noexcept;
@@ -104,6 +71,26 @@ struct TypeHandler {
 
 int instance_init() noexcept;
 std::unordered_set<PeerObject *> &instance_peers() noexcept;
+
+void allocator_init() noexcept;
+
+int peer_type_init() noexcept;
+
+int opaque_type_init() noexcept;
+
+bool unicode_verify_utf8(const void *data, Py_ssize_t size) noexcept;
+
+bool builtin_check(PyObject *object) noexcept;
+
+const TypeHandler *type_handler_for_object(PyObject *object) noexcept;
+const TypeHandler *type_handler_for_id(int32_t type_id) noexcept;
+PyTypeObject *type_object_for_id(int32_t type_id) noexcept;
+
+int marshal(PeerObject &peer, PyObject *bytearray, PyObject *object) noexcept;
+PyObject *unmarshal(PeerObject &peer, const void *data, Py_ssize_t size) noexcept;
+
+extern PyTypeObject peer_type;
+extern PyTypeObject opaque_type;
 
 extern const TypeHandler none_type_handler;
 extern const TypeHandler type_type_handler;
@@ -118,50 +105,7 @@ extern const TypeHandler unicode_type_handler;
 extern const TypeHandler code_type_handler;
 extern const TypeHandler function_type_handler;
 extern const TypeHandler module_type_handler;
-bool builtin_check(PyObject *object) noexcept;
 extern const TypeHandler builtin_type_handler;
-
-const TypeHandler *type_handler_for_object(PyObject *object) noexcept;
-const TypeHandler *type_handler_for_id(int32_t type_id) noexcept;
-PyTypeObject *type_object_for_id(int32_t type_id) noexcept;
-
-int opaque_type_init() noexcept;
-extern PyTypeObject opaque_type;
-
-int marshal(PeerObject &peer, PyObject *bytearray, PyObject *object) noexcept;
-PyObject *unmarshal(PeerObject &peer, const void *data, Py_ssize_t size) noexcept;
-
-void allocator_init() noexcept;
-
-bool unicode_verify_utf8(const void *data, Py_ssize_t size) noexcept;
-
-#if TAP_PORTABLE_BYTEORDER
-
-template <typename T> inline T port(T x) noexcept { return x; }
-
-#else
-
-template <typename T, unsigned int N> struct Porter;
-
-template <typename T> struct Porter<T, 1> {
-	static inline T port(T x) noexcept { return x; }
-};
-
-template <typename T> struct Porter<T, 2> {
-	static inline T port(T x) noexcept { return __bswap_16(x); }
-};
-
-template <typename T> struct Porter<T, 4> {
-	static inline T port(T x) noexcept { return __bswap_32(x); }
-};
-
-template <typename T> struct Porter<T, 8> {
-	static inline T port(T x) noexcept { return __bswap_64(x); }
-};
-
-template <typename T> inline T port(T x) noexcept { return Porter<T, sizeof (T)>::port(x); }
-
-#endif
 
 } // namespace tap
 
