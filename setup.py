@@ -10,6 +10,9 @@ setup(
 		Extension(
 			"tap/core",
 			extra_compile_args = [
+				"-Wextra",
+				"-Wno-missing-field-initializers",
+				"-Wno-unused-parameter",
 				"-fvisibility=hidden",
 				"-std=c++11",
 			],
