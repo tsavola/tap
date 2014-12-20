@@ -42,7 +42,7 @@ static int builtin_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObj
 	char *portable = reinterpret_cast<char *> (buf);
 
 	const char *module = reinterpret_cast<const char *> (PyUnicode_DATA(builtin->m_module));
-	size_t modulesize = strlen(module) + 1;
+	auto modulesize = strlen(module) + 1;
 
 	memcpy(portable, module, modulesize);
 	strcpy(portable + modulesize, builtin->m_ml->ml_name);
@@ -60,7 +60,7 @@ static PyObject *builtin_unmarshal_alloc(const void *data, Py_ssize_t size, Peer
 		return nullptr;
 
 	const char *module = portable;
-	size_t modulesize = strlen(module) + 1;
+	auto modulesize = strlen(module) + 1;
 
 	if (!unicode_verify_utf8(module, modulesize)) {
 		fprintf(stderr, "tap builtin unmarshal: module name contains bad UTF-8\n");
@@ -68,7 +68,7 @@ static PyObject *builtin_unmarshal_alloc(const void *data, Py_ssize_t size, Peer
 	}
 
 	const char *name = module + modulesize;
-	size_t namesize = size - modulesize;
+	auto namesize = size - modulesize;
 
 	if (namesize == 0 || strlen(name) != namesize - 1)
 		return nullptr;
