@@ -9,7 +9,10 @@ setup(
 	ext_modules = [
 		Extension(
 			"tap/core",
-			extra_compile_args = ["-std=c++11"],
+			extra_compile_args = [
+				"-fvisibility=hidden",
+				"-std=c++11",
+			],
 			sources = glob("tap/core/*.cpp"),
 		),
 	],

@@ -1,4 +1,5 @@
 #include "core.hpp"
+#include "init.hpp"
 
 using namespace tap;
 
