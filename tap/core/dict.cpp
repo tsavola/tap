@@ -10,7 +10,7 @@ struct Item {
 	Key value;
 } TAP_PACKED;
 
-static int dict_traverse(PyObject *object, visitproc visit, void *arg)
+static int dict_traverse(PyObject *object, visitproc visit, void *arg) noexcept
 {
 	Py_ssize_t pos = 0;
 	PyObject *key;
@@ -24,12 +24,12 @@ static int dict_traverse(PyObject *object, visitproc visit, void *arg)
 	return 0;
 }
 
-static Py_ssize_t dict_marshaled_size(PyObject *object)
+static Py_ssize_t dict_marshaled_size(PyObject *object) noexcept
 {
 	return sizeof (Item) * PyDict_Size(object);
 }
 
-static int dict_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer)
+static int dict_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	Item *portable = reinterpret_cast<Item *> (buf);
 	Py_ssize_t pos = 0;
@@ -53,7 +53,7 @@ static int dict_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject
 	return 0;
 }
 
-static PyObject *dict_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
+static PyObject *dict_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	if (size % sizeof (Item))
 		return nullptr;
@@ -61,7 +61,7 @@ static PyObject *dict_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObj
 	return PyDict_New();
 }
 
-static int dict_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer)
+static int dict_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	const Item *portable = reinterpret_cast<const Item *> (data);
 	Py_ssize_t length = size / sizeof (Item);
@@ -84,7 +84,7 @@ static int dict_unmarshal_init(PyObject *object, const void *data, Py_ssize_t si
 	return 0;
 }
 
-static int dict_unmarshal_update(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer)
+static int dict_unmarshal_update(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	if (size % sizeof (Item))
 		return -1;
@@ -109,7 +109,7 @@ static int dict_unmarshal_update(PyObject *object, const void *data, Py_ssize_t 
 
 		try {
 			included_keys.insert(key);
-		} catch (std::bad_alloc) {
+		} catch (...) {
 			return -1;
 		}
 	}
@@ -123,7 +123,7 @@ static int dict_unmarshal_update(PyObject *object, const void *data, Py_ssize_t 
 		if (included_keys.find(key) == included_keys.end()) {
 			try {
 				excluded_keys.insert(key);
-			} catch (std::bad_alloc) {
+			} catch (...) {
 				return -1;
 			}
 		}

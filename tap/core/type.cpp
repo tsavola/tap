@@ -6,17 +6,17 @@ struct Portable {
 	int32_t type_id;
 } TAP_PACKED;
 
-static int type_traverse(PyObject *object, visitproc visit, void *arg)
+static int type_traverse(PyObject *object, visitproc visit, void *arg) noexcept
 {
 	return 0;
 }
 
-static Py_ssize_t type_marshaled_size(PyObject *object)
+static Py_ssize_t type_marshaled_size(PyObject *object) noexcept
 {
 	return sizeof (Portable);
 }
 
-static int type_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer)
+static int type_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	const TypeHandler *handler = type_handler_for_object(object);
 	Portable *portable = reinterpret_cast<Portable *> (buf);
@@ -24,7 +24,7 @@ static int type_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject
 	return 0;
 }
 
-static PyObject *type_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
+static PyObject *type_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	if (size != sizeof (Portable))
 		return nullptr;
@@ -33,7 +33,7 @@ static PyObject *type_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObj
 	return reinterpret_cast<PyObject *> (type_object_for_id(port(portable->type_id)));
 }
 
-static int type_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer)
+static int type_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	return 0;
 }
@@ -47,7 +47,7 @@ const TypeHandler type_type_handler = {
 	type_unmarshal_init,
 };
 
-const TypeHandler *type_handler_for_object(PyObject *object)
+const TypeHandler *type_handler_for_object(PyObject *object) noexcept
 {
 	PyTypeObject *type = object->ob_type;
 
@@ -70,7 +70,7 @@ const TypeHandler *type_handler_for_object(PyObject *object)
 	return &opaque_type_handler;
 }
 
-const TypeHandler *type_handler_for_id(int32_t type_id)
+const TypeHandler *type_handler_for_id(int32_t type_id) noexcept
 {
 	if (type_id >= 0 && type_id < TYPE_ID_COUNT) {
 		switch (TypeId(type_id)) {
@@ -96,7 +96,7 @@ const TypeHandler *type_handler_for_id(int32_t type_id)
 	return nullptr;
 }
 
-PyTypeObject *type_object_for_id(int32_t type_id)
+PyTypeObject *type_object_for_id(int32_t type_id) noexcept
 {
 	if (type_id >= 0 && type_id < TYPE_ID_COUNT) {
 		switch (TypeId(type_id)) {

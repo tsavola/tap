@@ -4,7 +4,7 @@ using namespace tap;
 
 extern "C" {
 
-static PyObject *tap_marshal(PyObject *self, PyObject *args)
+static PyObject *tap_marshal(PyObject *self, PyObject *args) noexcept
 {
 	PyObject *result = nullptr;
 	PyObject *peer;
@@ -21,7 +21,7 @@ static PyObject *tap_marshal(PyObject *self, PyObject *args)
 	return result;
 }
 
-static PyObject *tap_unmarshal(PyObject *self, PyObject *args)
+static PyObject *tap_unmarshal(PyObject *self, PyObject *args) noexcept
 {
 	PyObject *result = nullptr;
 	PyObject *peer;
@@ -49,7 +49,7 @@ static PyModuleDef tap_module = {
 	tap_methods
 };
 
-PyMODINIT_FUNC PyInit_core()
+PyMODINIT_FUNC PyInit_core() noexcept
 {
 	if (instance_init() < 0)
 		return nullptr;

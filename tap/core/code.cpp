@@ -21,18 +21,18 @@ struct Portable {
 	int32_t firstlineno;
 	Key lnotab;
 
-	const uint8_t *cell2arg() const
+	const uint8_t *cell2arg() const noexcept
 	{
 		return reinterpret_cast<const uint8_t *> (this + 1);
 	}
 
-	uint8_t *cell2arg()
+	uint8_t *cell2arg() noexcept
 	{
 		return reinterpret_cast<uint8_t *> (this + 1);
 	}
 } TAP_PACKED;
 
-static int code_traverse(PyObject *object, visitproc visit, void *arg)
+static int code_traverse(PyObject *object, visitproc visit, void *arg) noexcept
 {
 	const PyCodeObject *self = reinterpret_cast<PyCodeObject *> (object);
 
@@ -50,7 +50,7 @@ static int code_traverse(PyObject *object, visitproc visit, void *arg)
 	return 0;
 }
 
-static Py_ssize_t code_marshaled_size(PyObject *object)
+static Py_ssize_t code_marshaled_size(PyObject *object) noexcept
 {
 	const PyCodeObject *codeobject = reinterpret_cast<PyCodeObject *> (object);
 	Py_ssize_t size = sizeof (Portable);
@@ -72,7 +72,7 @@ static Py_ssize_t code_marshaled_size(PyObject *object)
 #define TAP_CODE_MARSHAL_VALUE(NAME) \
 	portable->NAME = port(codeobject->co_##NAME)
 
-static int code_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer)
+static int code_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	const PyCodeObject *codeobject = reinterpret_cast<PyCodeObject *> (object);
 	Portable *portable = reinterpret_cast<Portable *> (buf);
@@ -102,7 +102,7 @@ static int code_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject
 #undef TAP_CODE_MARSHAL_OBJECT
 #undef TAP_CODE_MARSHAL_VALUE
 
-static PyObject *code_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
+static PyObject *code_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	if (size < Py_ssize_t(sizeof (Portable)))
 		return nullptr;
@@ -119,7 +119,7 @@ static PyObject *code_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObj
 #define TAP_CODE_UNMARSHAL_VALUE(NAME) \
 	codeobject->co_##NAME = port(portable->NAME)
 
-static int code_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer)
+static int code_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	PyCodeObject *codeobject = reinterpret_cast<PyCodeObject *> (object);
 	const Portable *portable = reinterpret_cast<const Portable *> (data);

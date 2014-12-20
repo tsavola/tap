@@ -17,7 +17,7 @@ struct Portable {
 	Key qualname;
 } TAP_PACKED;
 
-static int function_traverse(PyObject *object, visitproc visit, void *arg)
+static int function_traverse(PyObject *object, visitproc visit, void *arg) noexcept
 {
 	const PyFunctionObject *self = reinterpret_cast<PyFunctionObject *> (object);
 
@@ -37,7 +37,7 @@ static int function_traverse(PyObject *object, visitproc visit, void *arg)
 	return 0;
 }
 
-static Py_ssize_t function_marshaled_size(PyObject *object)
+static Py_ssize_t function_marshaled_size(PyObject *object) noexcept
 {
 	return sizeof (Portable);
 }
@@ -53,7 +53,7 @@ static Py_ssize_t function_marshaled_size(PyObject *object)
 		portable->NAME = port(key); \
 	} while (0)
 
-static int function_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer)
+static int function_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	const PyFunctionObject *function = reinterpret_cast<PyFunctionObject *> (object);
 	Portable *portable = reinterpret_cast<Portable *> (buf);
@@ -76,7 +76,7 @@ static int function_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerOb
 
 #undef TAP_FUNCTION_MARSHAL_OBJECT
 
-static PyObject *function_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
+static PyObject *function_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	if (size != sizeof (Portable))
 		return nullptr;
@@ -99,7 +99,7 @@ static PyObject *function_unmarshal_alloc(const void *data, Py_ssize_t size, Pee
 		function->func_##NAME = ptr; \
 	} while (0)
 
-static int function_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer)
+static int function_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	const Portable *portable = reinterpret_cast<const Portable *> (data);
 	PyFunctionObject *function = reinterpret_cast<PyFunctionObject *> (object);

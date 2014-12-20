@@ -7,23 +7,23 @@ namespace tap {
 class PeerObject::State
 {
 public:
-	State() throw ()
+	State() noexcept
 	{
 	}
 
-	State(Key key, bool dirty) throw ():
+	State(Key key, bool dirty) noexcept:
 		key(key),
 		dirty(dirty)
 	{
 	}
 
-	State(const State &other) throw ():
+	State(const State &other) noexcept:
 		key(other.key),
 		dirty(other.dirty)
 	{
 	}
 
-	State &operator=(const State &other) throw ()
+	State &operator=(const State &other) noexcept
 	{
 		key = other.key;
 		dirty = other.dirty;
@@ -34,7 +34,7 @@ public:
 	bool dirty;
 };
 
-PeerObject::PeerObject() throw (std::bad_alloc):
+PeerObject::PeerObject():
 	next_key(0)
 {
 	instance_peers().insert(this);
@@ -45,17 +45,17 @@ PeerObject::~PeerObject()
 	instance_peers().erase(this);
 }
 
-int PeerObject::insert(PyObject *object, Key key, bool dirty)
+int PeerObject::insert(PyObject *object, Key key, bool dirty) noexcept
 {
 	try {
 		states[object] = State(key, dirty);
-	} catch (std::bad_alloc) {
+	} catch (...) {
 		return -1;
 	}
 
 	try {
 		objects[key] = object;
-	} catch (std::bad_alloc) {
+	} catch (...) {
 		states.erase(object);
 		return -1;
 	}
@@ -63,7 +63,7 @@ int PeerObject::insert(PyObject *object, Key key, bool dirty)
 	return 0;
 }
 
-Key PeerObject::insert_new(PyObject *object, bool dirty)
+Key PeerObject::insert_new(PyObject *object, bool dirty) noexcept
 {
 	Key key = next_key;
 
@@ -75,14 +75,14 @@ Key PeerObject::insert_new(PyObject *object, bool dirty)
 	return key;
 }
 
-void PeerObject::clear(PyObject *object)
+void PeerObject::clear(PyObject *object) noexcept
 {
 	auto i = states.find(object);
 	if (i != states.end() && i->second.dirty)
 		i->second.dirty = false;
 }
 
-std::pair<Key, bool> PeerObject::insert_or_clear(PyObject *object)
+std::pair<Key, bool> PeerObject::insert_or_clear(PyObject *object) noexcept
 {
 	auto i = states.find(object);
 	if (i != states.end()) {
@@ -98,7 +98,7 @@ std::pair<Key, bool> PeerObject::insert_or_clear(PyObject *object)
 	}
 }
 
-Key PeerObject::key(PyObject *object)
+Key PeerObject::key(PyObject *object) noexcept
 {
 	auto i = states.find(object);
 	if (i != states.end()) {
@@ -108,7 +108,7 @@ Key PeerObject::key(PyObject *object)
 	}
 }
 
-PyObject *PeerObject::object(Key key)
+PyObject *PeerObject::object(Key key) noexcept
 {
 	PyObject *object = nullptr;
 
@@ -125,7 +125,7 @@ PyObject *PeerObject::object(Key key)
 	return object;
 }
 
-void PeerObject::object_freed(void *ptr)
+void PeerObject::object_freed(void *ptr) noexcept
 {
 	PyObject *object = reinterpret_cast<PyObject *> (ptr);
 
@@ -142,13 +142,13 @@ void PeerObject::object_freed(void *ptr)
 }
 
 extern "C" {
-	static PyObject *peer_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
+	static PyObject *peer_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) noexcept
 	{
 		PyObject *peer = type->tp_alloc(type, 0);
 		if (peer) {
 			try {
 				new (peer) PeerObject;
-			} catch (std::bad_alloc) {
+			} catch (...) {
 				type->tp_free(peer);
 				peer = nullptr;
 			}
@@ -157,14 +157,14 @@ extern "C" {
 		return peer;
 	}
 
-	static void peer_dealloc(PyObject *peer)
+	static void peer_dealloc(PyObject *peer) noexcept
 	{
 		reinterpret_cast<PeerObject *> (peer)->~PeerObject();
 		Py_TYPE(peer)->tp_free(peer);
 	}
 }
 
-int peer_type_init()
+int peer_type_init() noexcept
 {
 	return PyType_Ready(&peer_type);
 }

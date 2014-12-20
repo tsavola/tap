@@ -5,7 +5,7 @@
 
 namespace tap {
 
-static int list_traverse(PyObject *object, visitproc visit, void *arg)
+static int list_traverse(PyObject *object, visitproc visit, void *arg) noexcept
 {
 	for (Py_ssize_t i = 0; i < PyList_GET_SIZE(object); ++i)
 		Py_VISIT(PyList_GET_ITEM(object, i));
@@ -13,12 +13,12 @@ static int list_traverse(PyObject *object, visitproc visit, void *arg)
 	return 0;
 }
 
-static Py_ssize_t list_marshaled_size(PyObject *object)
+static Py_ssize_t list_marshaled_size(PyObject *object) noexcept
 {
 	return sizeof (Key) * PyList_GET_SIZE(object);
 }
 
-static int list_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer)
+static int list_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	Key *portable = reinterpret_cast<Key *> (buf);
 
@@ -33,7 +33,7 @@ static int list_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject
 	return 0;
 }
 
-static PyObject *list_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
+static PyObject *list_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	if (size % sizeof (Key))
 		return nullptr;
@@ -41,7 +41,7 @@ static PyObject *list_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObj
 	return PyList_New(size / sizeof (Key));
 }
 
-static int list_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer)
+static int list_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	const Key *portable = reinterpret_cast<const Key *> (data);
 
@@ -57,7 +57,7 @@ static int list_unmarshal_init(PyObject *object, const void *data, Py_ssize_t si
 	return 0;
 }
 
-static int list_unmarshal_update(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer)
+static int list_unmarshal_update(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	if (size % sizeof (Key))
 		return -1;
@@ -67,7 +67,7 @@ static int list_unmarshal_update(PyObject *object, const void *data, Py_ssize_t 
 
 	try {
 		refs.reserve(PyList_GET_SIZE(object));
-	} catch (std::bad_alloc) {
+	} catch (...) {
 		return -1;
 	}
 

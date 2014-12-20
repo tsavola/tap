@@ -1,7 +1,5 @@
 #include "core.hpp"
 
-#include <new>
-
 namespace tap {
 
 struct Instance {
@@ -10,16 +8,18 @@ struct Instance {
 
 static Instance *instance;
 
-int instance_init()
+int instance_init() noexcept
 {
-	instance = new (std::nothrow) Instance;
-	if (instance == nullptr)
+	try {
+		instance = new Instance;
+	} catch (...) {
 		return -1;
+	}
 
 	return 0;
 }
 
-std::unordered_set<PeerObject *> &instance_peers()
+std::unordered_set<PeerObject *> &instance_peers() noexcept
 {
 	return instance->peers;
 }

@@ -7,18 +7,18 @@ struct OpaqueObject {
 };
 
 extern "C" {
-	static PyObject *opaque_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
+	static PyObject *opaque_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) noexcept
 	{
 		return type->tp_alloc(type, 0);
 	}
 
-	static void opaque_dealloc(PyObject *opaque)
+	static void opaque_dealloc(PyObject *opaque) noexcept
 	{
 		Py_TYPE(opaque)->tp_free(opaque);
 	}
 }
 
-int opaque_type_init()
+int opaque_type_init() noexcept
 {
 	return PyType_Ready(&opaque_type);
 }
@@ -64,27 +64,27 @@ PyTypeObject opaque_type = {
 	opaque_new,                     /* tp_new */
 };
 
-static int opaque_traverse(PyObject *object, visitproc visit, void *arg)
+static int opaque_traverse(PyObject *object, visitproc visit, void *arg) noexcept
 {
 	return 0;
 }
 
-static Py_ssize_t opaque_marshaled_size(PyObject *object)
+static Py_ssize_t opaque_marshaled_size(PyObject *object) noexcept
 {
 	return 0;
 }
 
-static int opaque_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer)
+static int opaque_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	return 0;
 }
 
-static PyObject *opaque_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
+static PyObject *opaque_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	return opaque_type.tp_alloc(&opaque_type, 0);
 }
 
-static int opaque_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer)
+static int opaque_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	return 0;
 }

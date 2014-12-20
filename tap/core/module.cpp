@@ -17,30 +17,30 @@ namespace tap {
 struct Portable {
 	Key dict;
 
-	const char *name() const
+	const char *name() const noexcept
 	{
 		return reinterpret_cast<const char *> (this + 1);
 	}
 
-	char *name()
+	char *name() noexcept
 	{
 		return reinterpret_cast<char *> (this + 1);
 	}
 } TAP_PACKED;
 
-static int module_traverse(PyObject *object, visitproc visit, void *arg)
+static int module_traverse(PyObject *object, visitproc visit, void *arg) noexcept
 {
 	Py_VISIT(PyModule_GetDict(object));
 
 	return 0;
 }
 
-static Py_ssize_t module_marshaled_size(PyObject *object)
+static Py_ssize_t module_marshaled_size(PyObject *object) noexcept
 {
 	return sizeof (Portable) + strlen(PyModule_GetName(object));
 }
 
-static int module_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer)
+static int module_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	Key dict = peer.key(PyModule_GetDict(object));
 	if (dict < 0)
@@ -56,7 +56,7 @@ static int module_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObje
 	return 0;
 }
 
-static PyObject *module_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
+static PyObject *module_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	if (size <= Py_ssize_t(sizeof (Portable)))
 		return nullptr;
@@ -73,7 +73,7 @@ static PyObject *module_unmarshal_alloc(const void *data, Py_ssize_t size, PeerO
 	return object;
 }
 
-static int module_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer)
+static int module_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	PyModuleObject *module = reinterpret_cast<PyModuleObject *> (object);
 	const Portable *portable = reinterpret_cast<const Portable *> (data);

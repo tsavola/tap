@@ -4,28 +4,28 @@
 
 namespace tap {
 
-static int bytes_traverse(PyObject *object, visitproc visit, void *arg)
+static int bytes_traverse(PyObject *object, visitproc visit, void *arg) noexcept
 {
 	return 0;
 }
 
-static Py_ssize_t bytes_marshaled_size(PyObject *object)
+static Py_ssize_t bytes_marshaled_size(PyObject *object) noexcept
 {
 	return PyBytes_GET_SIZE(object);
 }
 
-static int bytes_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer)
+static int bytes_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	memcpy(buf, PyBytes_AS_STRING(object), size);
 	return 0;
 }
 
-static PyObject *bytes_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
+static PyObject *bytes_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	return PyBytes_FromStringAndSize(nullptr, size);
 }
 
-static int bytes_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer)
+static int bytes_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	memcpy(PyBytes_AS_STRING(object), data, size);
 	return 0;

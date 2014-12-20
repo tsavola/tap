@@ -66,15 +66,15 @@ enum TypeId {
 struct PeerObject {
 	PyObject_HEAD
 
-	PeerObject() throw (std::bad_alloc);
+	PeerObject();
 	~PeerObject();
 
-	int insert(PyObject *object, Key key, bool dirty = false);
-	void clear(PyObject *object);
-	std::pair<Key, bool> insert_or_clear(PyObject *object);
-	Key key(PyObject *object);
-	PyObject *object(Key key);
-	void object_freed(void *ptr);
+	int insert(PyObject *object, Key key, bool dirty = false) noexcept;
+	void clear(PyObject *object) noexcept;
+	std::pair<Key, bool> insert_or_clear(PyObject *object) noexcept;
+	Key key(PyObject *object) noexcept;
+	PyObject *object(Key key) noexcept;
+	void object_freed(void *ptr) noexcept;
 
 private:
 	class State;
@@ -82,28 +82,28 @@ private:
 	PeerObject(const PeerObject &);
 	void operator=(const PeerObject &);
 
-	Key insert_new(PyObject *object, bool dirty);
+	Key insert_new(PyObject *object, bool dirty) noexcept;
 
 	std::map<PyObject *, State> states;
 	std::map<Key, PyObject *> objects;
 	Key next_key;
 };
 
-int peer_type_init();
+int peer_type_init() noexcept;
 extern PyTypeObject peer_type;
 
 struct TypeHandler {
 	int32_t type_id;
-	int (*traverse)(PyObject *object, visitproc visit, void *arg);
-	Py_ssize_t (*marshaled_size)(PyObject *object);
-	int (*marshal)(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer);
-	PyObject *(*unmarshal_alloc)(const void *marshal_data, Py_ssize_t marshal_size, PeerObject &peer);
-	int (*unmarshal_init)(PyObject *object, const void *marshal_data, Py_ssize_t marshal_size, PeerObject &peer);
-	int (*unmarshal_update)(PyObject *object, const void *marshal_data, Py_ssize_t marshal_size, PeerObject &peer);
+	int (*traverse)(PyObject *object, visitproc visit, void *arg) noexcept;
+	Py_ssize_t (*marshaled_size)(PyObject *object) noexcept;
+	int (*marshal)(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer) noexcept;
+	PyObject *(*unmarshal_alloc)(const void *marshal_data, Py_ssize_t marshal_size, PeerObject &peer) noexcept;
+	int (*unmarshal_init)(PyObject *object, const void *marshal_data, Py_ssize_t marshal_size, PeerObject &peer) noexcept;
+	int (*unmarshal_update)(PyObject *object, const void *marshal_data, Py_ssize_t marshal_size, PeerObject &peer) noexcept;
 };
 
-int instance_init();
-std::unordered_set<PeerObject *> &instance_peers();
+int instance_init() noexcept;
+std::unordered_set<PeerObject *> &instance_peers() noexcept;
 
 extern const TypeHandler none_type_handler;
 extern const TypeHandler type_type_handler;
@@ -118,48 +118,48 @@ extern const TypeHandler unicode_type_handler;
 extern const TypeHandler code_type_handler;
 extern const TypeHandler function_type_handler;
 extern const TypeHandler module_type_handler;
-bool builtin_check(PyObject *object);
+bool builtin_check(PyObject *object) noexcept;
 extern const TypeHandler builtin_type_handler;
 
-const TypeHandler *type_handler_for_object(PyObject *object);
-const TypeHandler *type_handler_for_id(int32_t type_id);
-PyTypeObject *type_object_for_id(int32_t type_id);
+const TypeHandler *type_handler_for_object(PyObject *object) noexcept;
+const TypeHandler *type_handler_for_id(int32_t type_id) noexcept;
+PyTypeObject *type_object_for_id(int32_t type_id) noexcept;
 
-int opaque_type_init();
+int opaque_type_init() noexcept;
 extern PyTypeObject opaque_type;
 
-int marshal(PeerObject &peer, PyObject *bytearray, PyObject *object);
-PyObject *unmarshal(PeerObject &peer, const void *data, Py_ssize_t size);
+int marshal(PeerObject &peer, PyObject *bytearray, PyObject *object) noexcept;
+PyObject *unmarshal(PeerObject &peer, const void *data, Py_ssize_t size) noexcept;
 
-void allocator_init();
+void allocator_init() noexcept;
 
-bool unicode_verify_utf8(const void *data, Py_ssize_t size);
+bool unicode_verify_utf8(const void *data, Py_ssize_t size) noexcept;
 
 #if TAP_PORTABLE_BYTEORDER
 
-template <typename T> inline T port(T x) throw () { return x; }
+template <typename T> inline T port(T x) noexcept { return x; }
 
 #else
 
 template <typename T, unsigned int N> struct Porter;
 
 template <typename T> struct Porter<T, 1> {
-	static inline T port(T x) throw () { return x; }
+	static inline T port(T x) noexcept { return x; }
 };
 
 template <typename T> struct Porter<T, 2> {
-	static inline T port(T x) throw () { return __bswap_16(x); }
+	static inline T port(T x) noexcept { return __bswap_16(x); }
 };
 
 template <typename T> struct Porter<T, 4> {
-	static inline T port(T x) throw () { return __bswap_32(x); }
+	static inline T port(T x) noexcept { return __bswap_32(x); }
 };
 
 template <typename T> struct Porter<T, 8> {
-	static inline T port(T x) throw () { return __bswap_64(x); }
+	static inline T port(T x) noexcept { return __bswap_64(x); }
 };
 
-template <typename T> inline T port(T x) throw () { return Porter<T, sizeof (T)>::port(x); }
+template <typename T> inline T port(T x) noexcept { return Porter<T, sizeof (T)>::port(x); }
 
 #endif
 

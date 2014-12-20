@@ -4,7 +4,7 @@
 
 namespace tap {
 
-bool builtin_check(PyObject *object)
+bool builtin_check(PyObject *object) noexcept
 {
 	if (!PyCFunction_Check(object))
 		return false;
@@ -16,12 +16,12 @@ bool builtin_check(PyObject *object)
 	        PyUnicode_READY(builtin->m_module) == 0);
 }
 
-static int builtin_traverse(PyObject *object, visitproc visit, void *arg)
+static int builtin_traverse(PyObject *object, visitproc visit, void *arg) noexcept
 {
 	return 0;
 }
 
-static Py_ssize_t builtin_marshaled_size(PyObject *object)
+static Py_ssize_t builtin_marshaled_size(PyObject *object) noexcept
 {
 	PyCFunctionObject *builtin = reinterpret_cast<PyCFunctionObject *> (object);
 
@@ -35,7 +35,7 @@ static Py_ssize_t builtin_marshaled_size(PyObject *object)
 	return strlen(module) + 1 + strlen(builtin->m_ml->ml_name) + 1;
 }
 
-static int builtin_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer)
+static int builtin_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	PyCFunctionObject *builtin = reinterpret_cast<PyCFunctionObject *> (object);
 	char *portable = reinterpret_cast<char *> (buf);
@@ -49,7 +49,7 @@ static int builtin_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObj
 	return 0;
 }
 
-static PyObject *builtin_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
+static PyObject *builtin_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	if (size < 4)
 		return nullptr;
@@ -93,7 +93,7 @@ static PyObject *builtin_unmarshal_alloc(const void *data, Py_ssize_t size, Peer
 	return object;
 }
 
-static int builtin_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer)
+static int builtin_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	return 0;
 }

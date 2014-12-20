@@ -17,14 +17,14 @@ struct Marshaler {
 	PyObject *bytearray;
 	std::unordered_set<PyObject *> seen;
 
-	Marshaler(PeerObject &peer, PyObject *bytearray):
+	Marshaler(PeerObject &peer, PyObject *bytearray) noexcept:
 		peer(peer),
 		bytearray(bytearray)
 	{
 	}
 };
 
-static int marshal_visit(PyObject *object, void *arg)
+static int marshal_visit(PyObject *object, void *arg) noexcept
 {
 	Marshaler &marshaler = *reinterpret_cast<Marshaler *> (arg);
 
@@ -33,7 +33,7 @@ static int marshal_visit(PyObject *object, void *arg)
 
 	try {
 		marshaler.seen.insert(object);
-	} catch (std::bad_alloc) {
+	} catch (...) {
 		return -1;
 	}
 
@@ -82,7 +82,7 @@ static int marshal_visit(PyObject *object, void *arg)
 	return handler->traverse(object, marshal_visit, arg);
 }
 
-int marshal(PeerObject &peer, PyObject *bytearray, PyObject *object)
+int marshal(PeerObject &peer, PyObject *bytearray, PyObject *object) noexcept
 {
 	Marshaler marshaler(peer, bytearray);
 	Py_ssize_t original_size = PyByteArray_GET_SIZE(bytearray);
@@ -104,7 +104,7 @@ struct Unmarshaler {
 			Py_DECREF(object);
 	}
 
-	PyObject *alloc(PeerObject &peer, const void *data, Py_ssize_t size)
+	PyObject *alloc(PeerObject &peer, const void *data, Py_ssize_t size) noexcept
 	{
 		PyObject *root = nullptr;
 
@@ -145,7 +145,7 @@ struct Unmarshaler {
 
 				try {
 					created.insert(object);
-				} catch (std::bad_alloc) {
+				} catch (...) {
 					return nullptr;
 				}
 
@@ -167,7 +167,7 @@ struct Unmarshaler {
 		return root;
 	}
 
-	int init(PeerObject &peer, const void *data, Py_ssize_t size, bool init_dicts)
+	int init(PeerObject &peer, const void *data, Py_ssize_t size, bool init_dicts) noexcept
 	{
 		while (size >= Py_ssize_t(sizeof (Header))) {
 			const Header *header = reinterpret_cast<const Header *> (data);
@@ -204,7 +204,7 @@ struct Unmarshaler {
 	}
 };
 
-PyObject *unmarshal(PeerObject &peer, const void *data, Py_ssize_t size)
+PyObject *unmarshal(PeerObject &peer, const void *data, Py_ssize_t size) noexcept
 {
 	Unmarshaler unmarshaler;
 

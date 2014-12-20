@@ -2,23 +2,23 @@
 
 namespace tap {
 
-static int bool_traverse(PyObject *object, visitproc visit, void *arg)
+static int bool_traverse(PyObject *object, visitproc visit, void *arg) noexcept
 {
 	return 0;
 }
 
-static Py_ssize_t bool_marshaled_size(PyObject *object)
+static Py_ssize_t bool_marshaled_size(PyObject *object) noexcept
 {
 	return sizeof (uint8_t);
 }
 
-static int bool_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer)
+static int bool_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	*reinterpret_cast<uint8_t *> (buf) = port(object != Py_False);
 	return 0;
 }
 
-static PyObject *bool_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
+static PyObject *bool_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	if (size != sizeof (uint8_t))
 		return nullptr;
@@ -26,7 +26,7 @@ static PyObject *bool_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObj
 	return PyBool_FromLong(port(*reinterpret_cast<const uint8_t *> (data)));
 }
 
-static int bool_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer)
+static int bool_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	return 0;
 }

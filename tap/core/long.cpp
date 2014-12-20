@@ -2,23 +2,23 @@
 
 namespace tap {
 
-static int long_traverse(PyObject *object, visitproc visit, void *arg)
+static int long_traverse(PyObject *object, visitproc visit, void *arg) noexcept
 {
 	return 0;
 }
 
-static Py_ssize_t long_marshaled_size(PyObject *object)
+static Py_ssize_t long_marshaled_size(PyObject *object) noexcept
 {
 	return sizeof (int64_t);
 }
 
-static int long_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer)
+static int long_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	*reinterpret_cast<int64_t *> (buf) = port(PyLong_AsLongLong(object));
 	return 0;
 }
 
-static PyObject *long_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
+static PyObject *long_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	if (size != sizeof (int64_t))
 		return nullptr;
@@ -26,7 +26,7 @@ static PyObject *long_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObj
 	return PyLong_FromLongLong(port(*reinterpret_cast<const int64_t *> (data)));
 }
 
-static int long_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer)
+static int long_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	return 0;
 }

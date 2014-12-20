@@ -2,7 +2,7 @@
 
 namespace tap {
 
-static int tuple_traverse(PyObject *object, visitproc visit, void *arg)
+static int tuple_traverse(PyObject *object, visitproc visit, void *arg) noexcept
 {
 	for (Py_ssize_t i = 0; i < PyTuple_GET_SIZE(object); ++i)
 		Py_VISIT(PyTuple_GET_ITEM(object, i));
@@ -10,12 +10,12 @@ static int tuple_traverse(PyObject *object, visitproc visit, void *arg)
 	return 0;
 }
 
-static Py_ssize_t tuple_marshaled_size(PyObject *object)
+static Py_ssize_t tuple_marshaled_size(PyObject *object) noexcept
 {
 	return sizeof (Key) * PyTuple_GET_SIZE(object);
 }
 
-static int tuple_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer)
+static int tuple_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	Key *portable = reinterpret_cast<Key *> (buf);
 
@@ -30,7 +30,7 @@ static int tuple_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObjec
 	return 0;
 }
 
-static PyObject *tuple_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer)
+static PyObject *tuple_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	if (size % sizeof (Key))
 		return nullptr;
@@ -38,7 +38,7 @@ static PyObject *tuple_unmarshal_alloc(const void *data, Py_ssize_t size, PeerOb
 	return PyTuple_New(size / sizeof (Key));
 }
 
-static int tuple_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer)
+static int tuple_unmarshal_init(PyObject *object, const void *data, Py_ssize_t size, PeerObject &peer) noexcept
 {
 	const Key *portable = reinterpret_cast<const Key *> (data);
 

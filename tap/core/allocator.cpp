@@ -3,9 +3,9 @@
 namespace tap {
 
 extern "C" {
-	static void (*original_object_free)(void *ctx, void *ptr);
+	static void (*original_object_free)(void *ctx, void *ptr) noexcept;
 
-	static void object_free_wrapper(void *ctx, void *ptr)
+	static void object_free_wrapper(void *ctx, void *ptr) noexcept
 	{
 		for (PeerObject *peer: instance_peers())
 			peer->object_freed(ptr);
@@ -14,7 +14,7 @@ extern "C" {
 	}
 }
 
-void allocator_init()
+void allocator_init() noexcept
 {
 	PyMemAllocator allocator;
 
