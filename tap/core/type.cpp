@@ -88,6 +88,7 @@ const TypeHandler *type_handler_for_id(int32_t type_id)
 		case FUNCTION_TYPE_ID: return &function_type_handler;
 		case MODULE_TYPE_ID: return &module_type_handler;
 		case BUILTIN_TYPE_ID: return &builtin_type_handler;
+
 		case TYPE_ID_COUNT: break;
 		}
 	}
@@ -113,6 +114,7 @@ PyTypeObject *type_object_for_id(int32_t type_id)
 		case FUNCTION_TYPE_ID: return &PyFunction_Type;
 		case MODULE_TYPE_ID: return &PyModule_Type;
 		case BUILTIN_TYPE_ID: return &PyCFunction_Type;
+
 		case TYPE_ID_COUNT: break;
 		}
 	}

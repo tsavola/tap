@@ -131,7 +131,7 @@ void PeerObject::object_freed(void *ptr)
 
 	auto i = states.find(object);
 	if (i != states.end()) {
-		fprintf(stderr, "tap peer: %s object %p freed\n", 	object->ob_type->tp_name, object);
+		fprintf(stderr, "tap peer: %s object %p freed\n", object->ob_type->tp_name, object);
 
 		if (object->ob_refcnt != 0)
 			fprintf(stderr, "tap peer: %s object %p with unexpected reference count %ld when freed\n", object->ob_type->tp_name, object, object->ob_refcnt);
@@ -190,7 +190,7 @@ PyTypeObject peer_type = {
 	0,                              /* tp_setattro */
 	0,                              /* tp_as_buffer */
 	Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,  /* tp_flags */
-	nullptr,                           /* tp_doc */
+	nullptr,                        /* tp_doc */
 	0,                              /* tp_traverse */
 	0,                              /* tp_clear */
 	0,                              /* tp_richcompare */
