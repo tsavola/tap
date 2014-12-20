@@ -127,10 +127,10 @@ PyObject *PeerObject::object(Key key) noexcept
 
 void PeerObject::object_freed(void *ptr) noexcept
 {
-	PyObject *object = reinterpret_cast<PyObject *> (ptr);
-
-	auto i = states.find(object);
+	auto i = states.find(ptr);
 	if (i != states.end()) {
+		PyObject *object = reinterpret_cast<PyObject *> (ptr);
+
 		fprintf(stderr, "tap peer: %s object %p freed\n", object->ob_type->tp_name, object);
 
 		if (object->ob_refcnt != 0)

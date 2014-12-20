@@ -84,7 +84,7 @@ private:
 
 	Key insert_new(PyObject *object, bool dirty) noexcept;
 
-	std::map<PyObject *, State> states;
+	std::map<void *, State> states;
 	std::map<Key, PyObject *> objects;
 	Key next_key;
 };
