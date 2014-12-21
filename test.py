@@ -26,25 +26,40 @@ def test1():
 	peer = tap.Peer()
 	print("peer:", peer)
 
-	buf = bytearray()
 	t = (5435452652,)
-	obj = (func, (1324, 5435432, t, None), (54325235, 9, t, 765376542, None, 9), sys.getrefcount)
-	tap.marshal(peer, buf, obj)
+	l = [54325235, 9, t, 765376542, None, 9]
+	obj = (func, (1324, 5435432, t, None), l, sys.getrefcount)
 
+	buf = bytearray()
+	tap.marshal(peer, buf, obj)
 	print("size:", len(buf))
 
-	with open(sys.argv[2], "wb") as f:
+	with open("data-0", "wb") as f:
+		f.write(buf)
+
+	l[0] = 777
+	gc.collect()
+
+	buf = bytearray()
+	tap.marshal(peer, buf, obj)
+	print("size:", len(buf))
+
+	with open("data-1", "wb") as f:
 		f.write(buf)
 
 def test2():
-	with open(sys.argv[2], "rb") as f:
-		data = f.read()
-
 	peer = tap.Peer()
-	obj = tap.unmarshal(peer, data)
 
-	func = obj[0]
-	func(obj)
+	for n in range(2):
+		with open("data-{}".format(n), "rb") as f:
+			data = f.read()
+
+		obj = tap.unmarshal(peer, data)
+
+		func = obj[0]
+		func(obj)
+
+		gc.collect()
 
 if __name__ == "__main__":
 	main()

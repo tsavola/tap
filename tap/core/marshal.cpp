@@ -7,7 +7,11 @@
 
 namespace tap {
 
-struct Header {
+struct MarshalHeader {
+	Key root_key;
+} TAP_PACKED;
+
+struct ObjectHeader {
 	int32_t size;
 	int32_t type_id;
 	Key key;
@@ -52,7 +56,7 @@ static int marshal_visit(PyObject *object, void *arg) noexcept
 		if (size < 0)
 			return -1;
 
-		Py_ssize_t extent_size = sizeof (Header) + size;
+		Py_ssize_t extent_size = sizeof (ObjectHeader) + size;
 		if (extent_size > 0x7fffffff)
 			return -1;
 
@@ -66,7 +70,7 @@ static int marshal_visit(PyObject *object, void *arg) noexcept
 		if (PyObject_GetBuffer(marshaler.bytearray, &buffer, PyBUF_WRITABLE) < 0)
 			return -1;
 
-		Header *header = reinterpret_cast<Header *> (reinterpret_cast<char *> (buffer.buf) + offset);
+		auto header = reinterpret_cast<ObjectHeader *> (reinterpret_cast<char *> (buffer.buf) + offset);
 
 		header->size = port(extent_size);
 		header->type_id = port(handler->type_id);
@@ -85,15 +89,35 @@ static int marshal_visit(PyObject *object, void *arg) noexcept
 
 int marshal(PeerObject &peer, PyObject *bytearray, PyObject *object) noexcept
 {
+	Py_ssize_t orig_size = PyByteArray_GET_SIZE(bytearray);
 	Marshaler marshaler(peer, bytearray);
-	Py_ssize_t original_size = PyByteArray_GET_SIZE(bytearray);
+	Key root_key;
+	Py_buffer buffer;
+	MarshalHeader *header;
 
-	if (marshal_visit(object, &marshaler) < 0) {
-		PyByteArray_Resize(bytearray, original_size);
-		return -1;
-	}
+	if (PyByteArray_Resize(bytearray, orig_size + sizeof (MarshalHeader)) < 0)
+		goto fail;
+
+	if (marshal_visit(object, &marshaler) < 0)
+		goto fail;
+
+	root_key = peer.key(object);
+	if (root_key < 0)
+		goto fail;
+
+	if (PyObject_GetBuffer(bytearray, &buffer, PyBUF_WRITABLE) < 0)
+		goto fail;
+
+	header = reinterpret_cast<MarshalHeader *> (reinterpret_cast<char *> (buffer.buf) + orig_size);
+	header->root_key = port(root_key);
+
+	PyBuffer_Release(&buffer);
 
 	return 0;
+
+fail:
+	PyByteArray_Resize(bytearray, orig_size);
+	return -1;
 }
 
 struct Unmarshaler {
@@ -105,35 +129,33 @@ struct Unmarshaler {
 			Py_DECREF(object);
 	}
 
-	PyObject *alloc(PeerObject &peer, const void *data, Py_ssize_t size) noexcept
+	int alloc(PeerObject &peer, const void *data, Py_ssize_t size) noexcept
 	{
-		PyObject *root = nullptr;
-
-		while (size >= Py_ssize_t(sizeof (Header))) {
-			const Header *header = reinterpret_cast<const Header *> (data);
+		while (size >= Py_ssize_t(sizeof (ObjectHeader))) {
+			const auto header = reinterpret_cast<const ObjectHeader *> (data);
 			int32_t item_size = port(header->size);
 			int32_t item_type_id = port(header->type_id);
 			Key item_key = port(header->key);
 
 			if (item_size > size) {
 				fprintf(stderr, "tap unmarshal: header size out of bounds\n");
-				return nullptr;
+				return -1;
 			}
 
 			const TypeHandler *handler = type_handler_for_id(item_type_id);
 			if (handler == nullptr) {
 				fprintf(stderr, "tap unmarshal: object type id is unknown\n");
-				return nullptr;
+				return -1;
 			}
 
-			Py_ssize_t marshal_size = item_size - sizeof (Header);
+			Py_ssize_t marshal_size = item_size - sizeof (ObjectHeader);
 			const void *marshal_data = header + 1;
 
 			PyObject *object = peer.object(item_key);
 			if (object) {
 				if (handler->unmarshal_update == nullptr) {
 					fprintf(stderr, "tap unmarshal: update of immutable object\n");
-					return nullptr;
+					return -1;
 				}
 
 				peer.clear(object);
@@ -141,20 +163,17 @@ struct Unmarshaler {
 				object = handler->unmarshal_alloc(marshal_data, marshal_size, peer);
 				if (object == nullptr) {
 					fprintf(stderr, "tap unmarshal: allocation failed (type_id=%d)\n", item_type_id);
-					return nullptr;
+					return -1;
 				}
 
 				try {
 					created.insert(object);
 				} catch (...) {
-					return nullptr;
+					return -1;
 				}
 
 				peer.insert(object, item_key);
 			}
-
-			if (root == nullptr)
-				root = object;
 
 			data = reinterpret_cast<const char *> (data) + item_size;
 			size -= item_size;
@@ -162,23 +181,23 @@ struct Unmarshaler {
 
 		if (size > 0) {
 			fprintf(stderr, "tap unmarshal: trailing garbage or truncated data\n");
-			return nullptr;
+			return -1;
 		}
 
-		return root;
+		return 0;
 	}
 
 	int init(PeerObject &peer, const void *data, Py_ssize_t size, bool init_dicts) noexcept
 	{
-		while (size >= Py_ssize_t(sizeof (Header))) {
-			const Header *header = reinterpret_cast<const Header *> (data);
+		while (size >= Py_ssize_t(sizeof (ObjectHeader))) {
+			const auto header = reinterpret_cast<const ObjectHeader *> (data);
 			int32_t item_size = port(header->size);
 			int32_t item_type_id = port(header->type_id);
 			Key item_key = port(header->key);
 
 			const TypeHandler *handler = type_handler_for_id(item_type_id);
 
-			Py_ssize_t marshal_size = item_size - sizeof (Header);
+			Py_ssize_t marshal_size = item_size - sizeof (ObjectHeader);
 			const void *marshal_data = header + 1;
 
 			PyObject *object = peer.object(item_key);
@@ -207,16 +226,27 @@ struct Unmarshaler {
 
 PyObject *unmarshal(PeerObject &peer, const void *data, Py_ssize_t size) noexcept
 {
+	if (size < Py_ssize_t(sizeof (MarshalHeader))) {
+		fprintf(stderr, "tap unmarshal: not enough data\n");
+		return nullptr;
+	}
+
+	const auto header = reinterpret_cast<const MarshalHeader *> (data);
+	Key root_key = port(header->root_key);
+
+	data = reinterpret_cast<const char *> (data) + sizeof (MarshalHeader);
+	size -= sizeof (MarshalHeader);
+
 	Unmarshaler unmarshaler;
 
-	PyObject *root = unmarshaler.alloc(peer, data, size);
-	if (root == nullptr)
+	if (unmarshaler.alloc(peer, data, size) < 0)
 		return nullptr;
 
 	if (unmarshaler.init(peer, data, size, false) < 0 || unmarshaler.init(peer, data, size, true) < 0)
 		return nullptr;
 
-	Py_INCREF(root);
+	auto root = peer.object(root_key);
+	Py_XINCREF(root);
 	return root;
 }
 
