@@ -15,7 +15,12 @@ static Py_ssize_t long_marshaled_size(PyObject *object) noexcept
 
 static int long_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer) noexcept
 {
-	*reinterpret_cast<int64_t *> (buf) = port(PyLong_AsLongLong(object));
+	int overflow;
+	int64_t value = PyLong_AsLongLongAndOverflow(object, &overflow);
+	if (overflow != 0)
+		return -1;
+
+	*reinterpret_cast<int64_t *> (buf) = port(value);
 	return 0;
 }
 
