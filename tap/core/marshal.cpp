@@ -82,16 +82,16 @@ static int marshal_visit_objects(PyObject *object, void *arg) noexcept
 		return -1;
 	}
 
-	auto pair = marshaler.peer.insert_or_clear(object);
+	auto pair = marshaler.peer.insert_or_clear_for_remote(object);
+	Key remote_key = pair.first;
+	bool object_changed = pair.second;
 
-	Key key = pair.first;
-	if (key < 0)
+	if (remote_key < 0)
 		return -1;
 
 	const TypeHandler *handler = type_handler_for_object(object);
 
-	bool needed = pair.second;
-	if (needed) {
+	if (object_changed) {
 		Py_ssize_t size = handler->marshaled_size(object);
 		if (size < 0)
 			return -1;
@@ -107,7 +107,7 @@ static int marshal_visit_objects(PyObject *object, void *arg) noexcept
 
 		header->size = port(int32_t(extent_size));
 		header->type_id = port(handler->type_id);
-		header->key = port(key);
+		header->key = port(remote_key);
 
 		int ret = handler->marshal(object, header + 1, size, marshaler.peer);
 
@@ -139,8 +139,8 @@ static int marshal_objects(PeerObject &peer, PyObject *bytearray, PyObject *obje
 	if (section_size > 0x7fffffff)
 		return -1;
 
-	Key root_key = peer.key(object);
-	if (root_key < 0)
+	Key remote_root_key = peer.key_for_remote(object);
+	if (remote_root_key < 0)
 		return -1;
 
 	Py_buffer buffer;
@@ -150,7 +150,7 @@ static int marshal_objects(PeerObject &peer, PyObject *bytearray, PyObject *obje
 
 	header->section.size = port(int32_t(section_size));
 	header->section.id = port(int32_t(OBJECT_SECTION_ID));
-	header->root_key = port(root_key);
+	header->root_key = port(remote_root_key);
 
 	PyBuffer_Release(&buffer);
 
@@ -360,7 +360,7 @@ static int unmarshal_freed(PeerObject &peer, const void *data, Py_ssize_t size) 
 		Key key = port(portable[i]);
 		PyObject *object = peer.object(key);
 
-		fprintf(stderr, "tap unmarshal: object %p with key %d freed\n", object, key);
+		fprintf(stderr, "tap unmarshal: object %p with key %ld freed\n", object, key);
 
 		Py_XDECREF(object);
 	}

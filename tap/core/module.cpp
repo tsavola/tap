@@ -43,15 +43,15 @@ static Py_ssize_t module_marshaled_size(PyObject *object) noexcept
 
 static int module_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer) noexcept
 {
-	Key dict = peer.key(PyModule_GetDict(object));
-	if (dict < 0)
+	Key dict_rk = peer.key_for_remote(PyModule_GetDict(object));
+	if (dict_rk < 0)
 		return -1;
 
 	const char *name = PyModule_GetName(object);
 
 	Portable *portable = reinterpret_cast<Portable *> (buf);
 
-	portable->dict = port(dict);
+	portable->dict = port(dict_rk);
 	memcpy(portable->name(), name, strlen(name));
 
 	return 0;

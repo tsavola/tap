@@ -11,7 +11,7 @@
 
 namespace tap {
 
-typedef int32_t Key;
+typedef int64_t Key;
 
 enum TypeId {
 	NONE_TYPE_ID,
@@ -38,10 +38,10 @@ struct PeerObject {
 	PeerObject();
 	~PeerObject();
 
-	int insert(PyObject *object, Key key, bool dirty = false) noexcept;
+	int insert(PyObject *object, Key key) noexcept;
 	void clear(PyObject *object) noexcept;
-	std::pair<Key, bool> insert_or_clear(PyObject *object) noexcept;
-	Key key(PyObject *object) noexcept;
+	std::pair<Key, bool> insert_or_clear_for_remote(PyObject *object) noexcept;
+	Key key_for_remote(PyObject *object) noexcept;
 	PyObject *object(Key key) noexcept;
 	void touch(PyObject *object) noexcept;
 	void set_references(const std::unordered_set<PyObject *> &referenced) noexcept;
@@ -55,11 +55,13 @@ private:
 	PeerObject(const PeerObject &);
 	void operator=(const PeerObject &);
 
-	Key insert_new(PyObject *object, bool dirty) noexcept;
+	int insert(PyObject *object, Key key, unsigned int flags) noexcept;
+	Key insert_new(PyObject *object, unsigned int flags) noexcept;
+	Key key_for_remote(Key key) noexcept;
 
 	std::map<void *, State> states;
 	std::map<Key, PyObject *> objects;
-	Key next_key;
+	uint32_t next_object_id;
 };
 
 struct TypeHandler {

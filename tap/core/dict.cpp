@@ -38,17 +38,17 @@ static int dict_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject
 	PyObject *value_o;
 
 	for (Py_ssize_t i = 0; PyDict_Next(object, &pos, &key_o, &value_o); ++i) {
-		Key key_k = peer.key(key_o);
-		if (key_k < 0)
+		Key key_rk = peer.key_for_remote(key_o);
+		if (key_rk < 0)
 			return -1;
 
-		Key value_k = peer.key(value_o);
-		if (value_k < 0)
+		Key value_rk = peer.key_for_remote(value_o);
+		if (value_rk < 0)
 			return -1;
 
 		Item &item = portable[i];
-		item.key = port(key_k);
-		item.value = port(value_k);
+		item.key = port(key_rk);
+		item.value = port(value_rk);
 	}
 
 	return 0;

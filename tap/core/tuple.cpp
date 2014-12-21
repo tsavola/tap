@@ -21,11 +21,11 @@ static int tuple_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObjec
 	Key *portable = reinterpret_cast<Key *> (buf);
 
 	for (Py_ssize_t i = 0; i < PyTuple_GET_SIZE(object); ++i) {
-		Key key = peer.key(PyTuple_GET_ITEM(object, i));
-		if (key < 0)
+		Key remote_key = peer.key_for_remote(PyTuple_GET_ITEM(object, i));
+		if (remote_key < 0)
 			return -1;
 
-		portable[i] = port(key);
+		portable[i] = port(remote_key);
 	}
 
 	return 0;

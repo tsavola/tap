@@ -64,10 +64,10 @@ static Py_ssize_t code_marshaled_size(PyObject *object) noexcept
 
 #define TAP_CODE_MARSHAL_OBJECT(NAME) \
 	do { \
-		Key key = peer.key(codeobject->co_##NAME); \
-		if (key < 0) \
+		Key remote_key = peer.key_for_remote(codeobject->co_##NAME); \
+		if (remote_key < 0) \
 			return -1; \
-		portable->NAME = port(key); \
+		portable->NAME = port(remote_key); \
 	} while (0)
 
 #define TAP_CODE_MARSHAL_VALUE(NAME) \

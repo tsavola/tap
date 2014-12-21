@@ -45,13 +45,13 @@ static Py_ssize_t function_marshaled_size(PyObject *object) noexcept
 
 #define TAP_FUNCTION_MARSHAL_OBJECT(NAME) \
 	do { \
-		Key key = -1; \
+		Key remote_key = -1; \
 		if (function->func_##NAME) { \
-			key = peer.key(function->func_##NAME); \
-			if (key < 0) \
+			remote_key = peer.key_for_remote(function->func_##NAME); \
+			if (remote_key < 0) \
 				return -1; \
 		} \
-		portable->NAME = port(key); \
+		portable->NAME = port(remote_key); \
 	} while (0)
 
 static int function_marshal(PyObject *object, void *buf, Py_ssize_t size, PeerObject &peer) noexcept

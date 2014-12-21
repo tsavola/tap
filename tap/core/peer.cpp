@@ -49,7 +49,7 @@ struct PeerObject::State {
 };
 
 PeerObject::PeerObject():
-	next_key(0)
+	next_object_id(0)
 {
 	instance_peers().insert(this);
 }
@@ -64,10 +64,15 @@ PeerObject::~PeerObject()
 	}
 }
 
-int PeerObject::insert(PyObject *object, Key key, bool dirty) noexcept
+int PeerObject::insert(PyObject *object, Key key) noexcept
+{
+	return insert(object, key, State::DIRTY_FLAG);
+}
+
+int PeerObject::insert(PyObject *object, Key key, unsigned int flags) noexcept
 {
 	try {
-		states[object] = State(key, dirty ? State::DIRTY_FLAG : 0);
+		states[object] = State(key, flags);
 	} catch (...) {
 		return -1;
 	}
@@ -82,14 +87,14 @@ int PeerObject::insert(PyObject *object, Key key, bool dirty) noexcept
 	return 0;
 }
 
-Key PeerObject::insert_new(PyObject *object, bool dirty) noexcept
+Key PeerObject::insert_new(PyObject *object, unsigned int flags) noexcept
 {
-	Key key = next_key;
+	Key key = next_object_id;
 
-	if (insert(object, key, dirty) < 0)
+	if (insert(object, key, flags) < 0)
 		return -1;
 
-	next_key++;
+	next_object_id++;
 
 	return key;
 }
@@ -101,27 +106,50 @@ void PeerObject::clear(PyObject *object) noexcept
 		i->second.clear_flag(State::DIRTY_FLAG);
 }
 
-std::pair<Key, bool> PeerObject::insert_or_clear(PyObject *object) noexcept
+std::pair<Key, bool> PeerObject::insert_or_clear_for_remote(PyObject *object) noexcept
 {
+	bool object_changed;
+	Key key;
+
 	auto i = states.find(object);
 	if (i != states.end()) {
-		bool was_dirty = i->second.test_flag(State::DIRTY_FLAG);
+		object_changed = i->second.test_flag(State::DIRTY_FLAG);
 		i->second.clear_flag(State::DIRTY_FLAG);
-		return std::make_pair(i->second.key, was_dirty);
+		key = i->second.key;
 	} else {
-		Key key = insert_new(object, false);
-		return std::make_pair(key, true);
+		object_changed = true;
+		key = insert_new(object, 0);
 	}
+
+	Key remote_key = key_for_remote(key);
+
+	return std::make_pair(remote_key, object_changed);
 }
 
-Key PeerObject::key(PyObject *object) noexcept
+Key PeerObject::key_for_remote(PyObject *object) noexcept
 {
+	Key key;
+
 	auto i = states.find(object);
-	if (i != states.end()) {
-		return i->second.key;
-	} else {
-		return insert_new(object, true);
-	}
+	if (i != states.end())
+		key = i->second.key;
+	else
+		key = insert_new(object, State::DIRTY_FLAG);
+
+	return key_for_remote(key);
+}
+
+Key PeerObject::key_for_remote(Key key) noexcept
+{
+	if (key < 0)
+		return -1;
+
+	uint32_t object_id = key;
+	int32_t remote_id = key >> 32;
+
+	remote_id = !remote_id;
+
+	return (Key(remote_id) << 32) | object_id;
 }
 
 PyObject *PeerObject::object(Key key) noexcept
