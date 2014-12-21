@@ -63,6 +63,9 @@ PyMODINIT_FUNC PyInit_core() noexcept
 	if (opaque_type_init() < 0)
 		return nullptr;
 
+	if (list_py_type_init() < 0)
+		return nullptr;
+
 	allocator_init();
 
 	PyObject *module_obj = PyModule_Create(&module_def);

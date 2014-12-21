@@ -125,6 +125,13 @@ PyObject *PeerObject::object(Key key) noexcept
 	return object;
 }
 
+void PeerObject::touch(PyObject *object) noexcept
+{
+	auto i = states.find(object);
+	if (i != states.end())
+		i->second.dirty = true;
+}
+
 void PeerObject::object_freed(void *ptr) noexcept
 {
 	auto i = states.find(ptr);
@@ -207,5 +214,11 @@ PyTypeObject peer_type = {
 	0,                              /* tp_alloc */
 	peer_new,                       /* tp_new */
 };
+
+void peers_touch(PyObject *object) noexcept
+{
+	for (PeerObject *peer: instance_peers())
+		peer->touch(object);
+}
 
 } // namespace tap

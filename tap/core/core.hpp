@@ -42,6 +42,7 @@ struct PeerObject {
 	std::pair<Key, bool> insert_or_clear(PyObject *object) noexcept;
 	Key key(PyObject *object) noexcept;
 	PyObject *object(Key key) noexcept;
+	void touch(PyObject *object) noexcept;
 	void object_freed(void *ptr) noexcept;
 
 private:
@@ -73,8 +74,11 @@ std::unordered_set<PeerObject *> &instance_peers() noexcept;
 void allocator_init() noexcept;
 
 int peer_type_init() noexcept;
+void peers_touch(PyObject *object) noexcept;
 
 int opaque_type_init() noexcept;
+
+int list_py_type_init() noexcept;
 
 bool unicode_verify_utf8(const void *data, Py_ssize_t size) noexcept;
 
