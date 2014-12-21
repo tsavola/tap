@@ -11,9 +11,9 @@ bool builtin_check(PyObject *object)
 
 	PyCFunctionObject *builtin = reinterpret_cast<PyCFunctionObject *> (object);
 
-	return builtin->m_module &&
-	       PyUnicode_Check(builtin->m_module) &&
-	       PyUnicode_READY(builtin->m_module) == 0;
+	return (builtin->m_module &&
+	        PyUnicode_Check(builtin->m_module) &&
+	        PyUnicode_READY(builtin->m_module) == 0);
 }
 
 static int builtin_traverse(PyObject *object, visitproc visit, void *arg)
