@@ -7,8 +7,8 @@ build:: $(TARGET)
 
 test:: build
 	cp test.py env/lib/
-	. env/bin/activate && cd env && python -B lib/test.py 1 data
-	. env/bin/activate && cd env && python -B lib/test.py 2 data
+	. env/bin/activate && cd env && python -B lib/test.py 1
+	. env/bin/activate && cd env && python -B lib/test.py 2
 
 $(TARGET): env/bin/activate $(SOURCES)
 	. env/bin/activate && python setup.py clean install

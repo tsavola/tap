@@ -14,7 +14,7 @@ setup(
 				"-Wno-missing-field-initializers",
 				"-Wno-unused-parameter",
 				"-fvisibility=hidden",
-				"-std=c++11",
+				"-std=c++0x",
 			],
 			sources = glob("tap/core/*.cpp"),
 		),
