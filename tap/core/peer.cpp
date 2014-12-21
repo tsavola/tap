@@ -66,7 +66,7 @@ PeerObject::~PeerObject()
 
 int PeerObject::insert(PyObject *object, Key key) noexcept
 {
-	return insert(object, key, State::DIRTY_FLAG);
+	return insert(object, key, 0);
 }
 
 int PeerObject::insert(PyObject *object, Key key, unsigned int flags) noexcept
