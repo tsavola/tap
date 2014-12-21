@@ -3,10 +3,6 @@
 
 #include "visibility.hpp"
 
-extern "C" {
-
-PyMODINIT_FUNC PyInit_core() noexcept TAP_VISIBLE;
-
-} // extern "C"
+extern "C" PyMODINIT_FUNC PyInit_core() noexcept TAP_VISIBLE;
 
 #endif

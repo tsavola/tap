@@ -3,9 +3,9 @@
 
 using namespace tap;
 
-extern "C" {
+namespace tap {
 
-static PyObject *tap_marshal(PyObject *self, PyObject *args) noexcept
+static PyObject *marshal_py(PyObject *self, PyObject *args) noexcept
 {
 	PyObject *result = nullptr;
 	PyObject *peer;
@@ -22,7 +22,7 @@ static PyObject *tap_marshal(PyObject *self, PyObject *args) noexcept
 	return result;
 }
 
-static PyObject *tap_unmarshal(PyObject *self, PyObject *args) noexcept
+static PyObject *unmarshal_py(PyObject *self, PyObject *args) noexcept
 {
 	PyObject *result = nullptr;
 	PyObject *peer;
@@ -36,19 +36,21 @@ static PyObject *tap_unmarshal(PyObject *self, PyObject *args) noexcept
 	return result;
 }
 
-static PyMethodDef tap_methods[] = {
-	{ "marshal", tap_marshal, METH_VARARGS, nullptr },
-	{ "unmarshal", tap_unmarshal, METH_VARARGS, nullptr },
-	{ nullptr, nullptr, 0, nullptr }
+static PyMethodDef method_defs[] = {
+	{ "marshal", marshal_py, METH_VARARGS },
+	{ "unmarshal", unmarshal_py, METH_VARARGS },
+	{}
 };
 
-static PyModuleDef tap_module = {
+static PyModuleDef module_def = {
 	PyModuleDef_HEAD_INIT,
 	"tap.core",
 	nullptr,
 	-1,
-	tap_methods
+	method_defs,
 };
+
+} // namespace tap
 
 PyMODINIT_FUNC PyInit_core() noexcept
 {
@@ -63,17 +65,15 @@ PyMODINIT_FUNC PyInit_core() noexcept
 
 	allocator_init();
 
-	PyObject *m = PyModule_Create(&tap_module);
-	if (m == nullptr)
+	PyObject *module_obj = PyModule_Create(&module_def);
+	if (module_obj == nullptr)
 		return nullptr;
 
 	Py_INCREF(&peer_type);
-	PyModule_AddObject(m, "Peer", (PyObject *) &peer_type);
+	PyModule_AddObject(module_obj, "Peer", (PyObject *) &peer_type);
 
 	Py_INCREF(&opaque_type);
-	PyModule_AddObject(m, "Opaque", (PyObject *) &opaque_type);
+	PyModule_AddObject(module_obj, "Opaque", (PyObject *) &opaque_type);
 
-	return m;
+	return module_obj;
 }
-
-} // extern "C"

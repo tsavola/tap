@@ -6,16 +6,14 @@ struct OpaqueObject {
 	PyObject_HEAD
 };
 
-extern "C" {
-	static PyObject *opaque_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) noexcept
-	{
-		return type->tp_alloc(type, 0);
-	}
+static PyObject *opaque_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) noexcept
+{
+	return type->tp_alloc(type, 0);
+}
 
-	static void opaque_dealloc(PyObject *opaque) noexcept
-	{
-		Py_TYPE(opaque)->tp_free(opaque);
-	}
+static void opaque_dealloc(PyObject *opaque) noexcept
+{
+	Py_TYPE(opaque)->tp_free(opaque);
 }
 
 int opaque_type_init() noexcept

@@ -141,27 +141,25 @@ void PeerObject::object_freed(void *ptr) noexcept
 	}
 }
 
-extern "C" {
-	static PyObject *peer_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) noexcept
-	{
-		PyObject *peer = type->tp_alloc(type, 0);
-		if (peer) {
-			try {
-				new (peer) PeerObject;
-			} catch (...) {
-				type->tp_free(peer);
-				peer = nullptr;
-			}
+static PyObject *peer_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) noexcept
+{
+	PyObject *peer = type->tp_alloc(type, 0);
+	if (peer) {
+		try {
+			new (peer) PeerObject;
+		} catch (...) {
+			type->tp_free(peer);
+			peer = nullptr;
 		}
-
-		return peer;
 	}
 
-	static void peer_dealloc(PyObject *peer) noexcept
-	{
-		reinterpret_cast<PeerObject *> (peer)->~PeerObject();
-		Py_TYPE(peer)->tp_free(peer);
-	}
+	return peer;
+}
+
+static void peer_dealloc(PyObject *peer) noexcept
+{
+	reinterpret_cast<PeerObject *> (peer)->~PeerObject();
+	Py_TYPE(peer)->tp_free(peer);
 }
 
 int peer_type_init() noexcept
