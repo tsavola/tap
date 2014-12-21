@@ -358,11 +358,10 @@ static int unmarshal_freed(PeerObject &peer, const void *data, Py_ssize_t size) 
 
 	for (int i = 0; i < count; i++) {
 		Key key = port(portable[i]);
-		PyObject *object = peer.object(key);
 
-		fprintf(stderr, "tap unmarshal: object %p with key %ld freed\n", object, key);
+		fprintf(stderr, "tap unmarshal: object with key %ld dereference\n", key);
 
-		Py_XDECREF(object);
+		peer.dereference(key);
 	}
 
 	return 0;

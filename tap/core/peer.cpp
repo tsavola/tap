@@ -182,6 +182,22 @@ void PeerObject::set_references(const std::unordered_set<PyObject *> &referenced
 		states.find(object)->second.set_flag(State::REFERENCE_FLAG);
 }
 
+void PeerObject::dereference(Key key) noexcept
+{
+	auto i = objects.find(key);
+	if (i != objects.end()) {
+		PyObject *object = i->second;
+		State &state = states.find(object)->second;
+
+		if (state.test_flag(State::REFERENCE_FLAG)) {
+			state.clear_flag(State::REFERENCE_FLAG);
+			state.set_flag(State::DIRTY_FLAG);
+
+			Py_DECREF(object);
+		}
+	}
+}
+
 void PeerObject::object_freed(void *ptr) noexcept
 {
 	auto i = states.find(ptr);

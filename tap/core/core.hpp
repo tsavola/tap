@@ -45,6 +45,7 @@ struct PeerObject {
 	PyObject *object(Key key) noexcept;
 	void touch(PyObject *object) noexcept;
 	void set_references(const std::unordered_set<PyObject *> &referenced) noexcept;
+	void dereference(Key key) noexcept;
 	void object_freed(void *ptr) noexcept;
 
 	std::vector<Key> freed;
