@@ -1,19 +1,42 @@
-import gc
+import asyncio
+import multiprocessing
+import os
 import sys
 
 import tap
-import tap.core
 
-def main():
-	if sys.argv[1] == "1":
-		f = test1
-	elif sys.argv[1] == "2":
-		f = test2
+def test_server():
+	loop = asyncio.get_event_loop()
 
-	f()
-	gc.collect()
+	@asyncio.coroutine
+	def connected(reader, writer):
+		print("server: connection from client")
 
-def test1():
+		try:
+			with tap.Connection(reader, writer) as conn:
+				while True:
+					obj = yield from conn.receive()
+					if obj is None:
+						break
+
+					print("server: received object from client")
+
+					func = obj[0]
+					func(obj)
+
+				print("server: EOF from client")
+
+			print("server: connection closed")
+		finally:
+			loop.stop()
+
+	if os.path.exists("socket"):
+		os.remove("socket")
+
+	loop.run_until_complete(asyncio.start_unix_server(connected, "socket"))
+	loop.run_forever()
+
+def test_client():
 	def func(obj):
 		print("obj:", obj)
 		print("sys.prefix:", sys.prefix)
@@ -21,45 +44,46 @@ def test1():
 		getrefcount = obj[-1]
 		print("refcount:", getrefcount(None))
 
-	print("opaque:", tap.core.Opaque())
+	loop = asyncio.get_event_loop()
+	reader, writer = loop.run_until_complete(asyncio.open_unix_connection("socket"))
 
-	peer = tap.Peer()
-	print("peer:", peer)
+	print("client: connected to server")
 
-	t = (5435452652,)
-	l = [54325235, 9, t, 765376542, None, 9]
-	obj = (func, (1324, 5435432, t, None), l, sys.getrefcount)
+	with tap.Connection(reader, writer) as conn:
+		print("client: sending object to server")
 
-	buf = bytearray()
-	tap.marshal(peer, buf, obj)
-	print("size:", len(buf))
+		t = (5435452652,)
+		l = [54325235, 9, t, 765376542, None, 9]
+		obj = (func, (1324, 5435432, t, None), l, sys.getrefcount)
 
-	with open("data-0", "wb") as f:
-		f.write(buf)
+		loop.run_until_complete(conn.send(obj))
 
-	l[0] = 777
-	gc.collect()
+		print("client: sending object to server")
 
-	buf = bytearray()
-	tap.marshal(peer, buf, obj)
-	print("size:", len(buf))
+		l[0] = 777
 
-	with open("data-1", "wb") as f:
-		f.write(buf)
+		loop.run_until_complete(conn.send(obj))
 
-def test2():
-	peer = tap.Peer()
+	print("client: connection closed")
 
-	for n in range(2):
-		with open("data-{}".format(n), "rb") as f:
-			data = f.read()
+def main():
+	procs = []
 
-		obj = tap.unmarshal(peer, data)
+	for target, name in [(test_server, "server"), (test_client, "client")]:
+		p = multiprocessing.Process(target=target, name=name)
+		p.start()
 
-		func = obj[0]
-		func(obj)
+		procs.append(p)
 
-		gc.collect()
+	for p in procs:
+		p.join()
+
+	for p in procs:
+		if p.exitcode:
+			print(p, file=sys.stderr)
+
+	if any(p.exitcode for p in procs):
+		sys.exit(1)
 
 if __name__ == "__main__":
 	main()

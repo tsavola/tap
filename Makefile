@@ -6,16 +6,16 @@ SOURCES	:= $(wildcard tap/*.py tap/core/*.cpp tap/core/*.hpp)
 build:: $(TARGET)
 
 test:: build
-	cp test.py env/lib/
-	. env/bin/activate && cd env && python -B lib/test.py 1
-	. env/bin/activate && cd env && python -B lib/test.py 2
+	cp test.py env/
+	. env/bin/activate && cd env && python test.py
 
 $(TARGET): env/bin/activate $(SOURCES)
 	. env/bin/activate && python setup.py clean install
 	touch $@
 
 env/bin/activate: cpython/python
-	cpython/python -m venv --clear --without-pip env
+#	cpython/python -m venv --clear --without-pip env
+	python3.4 -m venv --clear --without-pip env
 
 cpython/python: cpython/Makefile
 	$(MAKE) -C cpython -j$(J)
