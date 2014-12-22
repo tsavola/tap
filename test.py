@@ -87,6 +87,7 @@ def test_client():
 		print("client: received object from server")
 
 		stdout2, l2 = obj2
+		l2[-1] = 11
 
 		print("loopback:", l2, file=stdout2)
 		assert l is l2
