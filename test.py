@@ -14,7 +14,11 @@ def test_server():
 
 		try:
 			with tap.Connection(reader, writer) as conn:
+				count = 0
+
 				while True:
+					print("server: receiving object from client")
+
 					obj = yield from conn.receive()
 					if obj is None:
 						break
@@ -23,6 +27,11 @@ def test_server():
 
 					func = obj[0]
 					func(obj)
+
+					count += 1
+					if count == 2:
+						obj2 = obj[1:3]
+						yield from conn.send(obj2)
 
 				print("server: EOF from client")
 
@@ -55,10 +64,11 @@ def test_client():
 		m = {"foo": "bar"}
 		t = (5435452652, m)
 		l = [54325235, 9, t, 765376542, None, 9]
-		obj = (func, (1324, 5435432, t, None), l, sys.getrefcount)
+		obj = (func, sys.stdout, l, (1324, 5435432, t, None), sys.getrefcount)
 
 		loop.run_until_complete(conn.send(obj))
 
+		print("client: sent object to server")
 		print("client: sending object to server")
 
 		l[0] = 777
@@ -68,6 +78,18 @@ def test_client():
 		m[False] = True
 
 		loop.run_until_complete(conn.send(obj))
+
+		print("client: sent object to server")
+		print("client: receiving object from server")
+
+		obj2 = loop.run_until_complete(conn.receive())
+
+		print("client: received object from server")
+
+		stdout2, l2 = obj2
+
+		print("loopback:", l2, file=stdout2)
+		assert l is l2
 
 	print("client: connection closed")
 
