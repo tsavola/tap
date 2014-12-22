@@ -85,7 +85,9 @@ void peers_touch(PyObject *object) noexcept;
 
 int opaque_type_init() noexcept;
 
-int list_py_type_init() noexcept;
+void list_py_type_init() noexcept;
+
+void dict_py_type_init() noexcept;
 
 bool unicode_verify_utf8(const void *data, Py_ssize_t size) noexcept;
 

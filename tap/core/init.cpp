@@ -63,8 +63,8 @@ PyMODINIT_FUNC PyInit_core() noexcept
 	if (opaque_type_init() < 0)
 		return nullptr;
 
-	if (list_py_type_init() < 0)
-		return nullptr;
+	list_py_type_init();
+	dict_py_type_init();
 
 	allocator_init();
 

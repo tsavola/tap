@@ -1,10 +1,16 @@
 #include "core.hpp"
+#include "mapping.hpp"
 #include "portable.hpp"
 
 #include <stdexcept>
 #include <unordered_set>
 
 namespace tap {
+
+void dict_py_type_init() noexcept
+{
+	MappingWrap<PyDictObject>::init(&PyDict_Type);
+}
 
 struct Item {
 	Key key;

@@ -1,4 +1,5 @@
 #include "core.hpp"
+#include "mapping.hpp"
 #include "portable.hpp"
 
 #include <stdexcept>
@@ -6,23 +7,9 @@
 
 namespace tap {
 
-static int (*list_py_ass_subscript_orig)(PyObject *, PyObject *, PyObject *) noexcept;
-
-static int list_py_ass_subscript_wrap(PyObject *self, PyObject *key, PyObject *value) noexcept
+void list_py_type_init() noexcept
 {
-	int ret = list_py_ass_subscript_orig(self, key, value);
-	if (ret == 0)
-		peers_touch(self);
-
-	return ret;
-}
-
-int list_py_type_init() noexcept
-{
-	list_py_ass_subscript_orig = PyList_Type.tp_as_mapping->mp_ass_subscript;
-	PyList_Type.tp_as_mapping->mp_ass_subscript = list_py_ass_subscript_wrap;
-
-	return 0;
+	MappingWrap<PyListObject>::init(&PyList_Type);
 }
 
 static int list_traverse(PyObject *object, visitproc visit, void *arg) noexcept

@@ -52,7 +52,8 @@ def test_client():
 	with tap.Connection(reader, writer) as conn:
 		print("client: sending object to server")
 
-		t = (5435452652,)
+		m = {"foo": "bar"}
+		t = (5435452652, m)
 		l = [54325235, 9, t, 765376542, None, 9]
 		obj = (func, (1324, 5435432, t, None), l, sys.getrefcount)
 
@@ -61,6 +62,10 @@ def test_client():
 		print("client: sending object to server")
 
 		l[0] = 777
+
+		m["foo"] = "bar2"
+		m[1] = 2
+		m[False] = True
 
 		loop.run_until_complete(conn.send(obj))
 
