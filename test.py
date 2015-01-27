@@ -1,29 +1,34 @@
 import asyncio
+import logging
 import multiprocessing
 import os
 import sys
 
+logging.basicConfig(level=logging.DEBUG)
+
 import tap
+
+log = logging.getLogger("test")
 
 def test_server():
 	loop = asyncio.get_event_loop()
 
 	@asyncio.coroutine
 	def connected(reader, writer):
-		print("server: connection from client")
+		log.info("server: connection from client")
 
 		try:
 			with tap.Connection(reader, writer) as conn:
 				count = 0
 
 				while True:
-					print("server: receiving object from client")
+					log.info("server: receiving object from client")
 
 					obj = yield from conn.receive()
 					if obj is None:
 						break
 
-					print("server: received object from client")
+					log.info("server: received object from client")
 
 					func = obj[0]
 					func(obj)
@@ -33,9 +38,9 @@ def test_server():
 						obj2 = obj[1:3]
 						yield from conn.send(obj2)
 
-				print("server: EOF from client")
+				log.info("server: EOF from client")
 
-			print("server: connection closed")
+			log.info("server: connection closed")
 		finally:
 			loop.stop()
 
@@ -56,10 +61,10 @@ def test_client():
 	loop = asyncio.get_event_loop()
 	reader, writer = loop.run_until_complete(asyncio.open_unix_connection("socket"))
 
-	print("client: connected to server")
+	log.info("client: connected to server")
 
 	with tap.Connection(reader, writer) as conn:
-		print("client: sending object to server")
+		log.info("client: sending object to server")
 
 		m = {"foo": "bar"}
 		t = (5435452652, m)
@@ -68,8 +73,8 @@ def test_client():
 
 		loop.run_until_complete(conn.send(obj))
 
-		print("client: sent object to server")
-		print("client: sending object to server")
+		log.info("client: sent object to server")
+		log.info("client: sending object to server")
 
 		l[0] = 777
 
@@ -79,12 +84,12 @@ def test_client():
 
 		loop.run_until_complete(conn.send(obj))
 
-		print("client: sent object to server")
-		print("client: receiving object from server")
+		log.info("client: sent object to server")
+		log.info("client: receiving object from server")
 
 		obj2 = loop.run_until_complete(conn.receive())
 
-		print("client: received object from server")
+		log.info("client: received object from server")
 
 		stdout2, l2 = obj2
 		l2[-1] = 11
@@ -92,7 +97,7 @@ def test_client():
 		print("loopback:", l2, file=stdout2)
 		assert l is l2
 
-	print("client: connection closed")
+	log.info("client: connection closed")
 
 def main():
 	procs = []
@@ -108,7 +113,7 @@ def main():
 
 	for p in procs:
 		if p.exitcode:
-			print(p, file=sys.stderr)
+			log.error(p)
 
 	if any(p.exitcode for p in procs):
 		sys.exit(1)
