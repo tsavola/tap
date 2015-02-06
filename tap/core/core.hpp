@@ -2,6 +2,7 @@
 #define TAP_CORE_CORE_HPP
 
 #include <Python.h>
+#include <frameobject.h>
 
 #include <cstdint>
 #include <map>
@@ -28,6 +29,7 @@ enum TypeId {
 	FUNCTION_TYPE_ID,
 	MODULE_TYPE_ID,
 	BUILTIN_TYPE_ID,
+	FRAME_TYPE_ID,
 
 	TYPE_ID_COUNT
 };
@@ -117,6 +119,7 @@ extern const TypeHandler code_type_handler;
 extern const TypeHandler function_type_handler;
 extern const TypeHandler module_type_handler;
 extern const TypeHandler builtin_type_handler;
+extern const TypeHandler frame_type_handler;
 
 } // namespace tap
 

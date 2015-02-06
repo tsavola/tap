@@ -65,6 +65,7 @@ const TypeHandler *type_handler_for_object(PyObject *object) noexcept
 	if (type == &PyFunction_Type) return &function_type_handler;
 	if (type == &PyModule_Type) return &module_type_handler;
 	if (type == &PyCFunction_Type && builtin_check(object)) return &builtin_type_handler;
+	if (type == &PyFrame_Type) return &frame_type_handler;
 
 	//fprintf(stderr, "type_handler_for_object: %s -> opaque\n", type->tp_name);
 
@@ -89,6 +90,7 @@ const TypeHandler *type_handler_for_id(int32_t type_id) noexcept
 		case FUNCTION_TYPE_ID: return &function_type_handler;
 		case MODULE_TYPE_ID: return &module_type_handler;
 		case BUILTIN_TYPE_ID: return &builtin_type_handler;
+		case FRAME_TYPE_ID: return &frame_type_handler;
 
 		case TYPE_ID_COUNT: break;
 		}
@@ -115,6 +117,7 @@ PyTypeObject *type_object_for_id(int32_t type_id) noexcept
 		case FUNCTION_TYPE_ID: return &PyFunction_Type;
 		case MODULE_TYPE_ID: return &PyModule_Type;
 		case BUILTIN_TYPE_ID: return &PyCFunction_Type;
+		case FRAME_TYPE_ID: return &PyFrame_Type;
 
 		case TYPE_ID_COUNT: break;
 		}
