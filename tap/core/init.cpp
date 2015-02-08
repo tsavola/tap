@@ -60,9 +60,6 @@ PyMODINIT_FUNC PyInit_core() noexcept
 	if (peer_type_init() < 0)
 		return nullptr;
 
-	if (opaque_type_init() < 0)
-		return nullptr;
-
 	list_py_type_init();
 	dict_py_type_init();
 
@@ -74,9 +71,6 @@ PyMODINIT_FUNC PyInit_core() noexcept
 
 	Py_INCREF(&peer_type);
 	PyModule_AddObject(module_obj, "Peer", (PyObject *) &peer_type);
-
-	Py_INCREF(&opaque_type);
-	PyModule_AddObject(module_obj, "Opaque", (PyObject *) &opaque_type);
 
 	return module_obj;
 }

@@ -6,6 +6,8 @@
 
 #include <cstdint>
 #include <map>
+#include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -15,9 +17,9 @@ namespace tap {
 typedef int64_t Key;
 
 enum TypeId {
+	OPAQUE_TYPE_ID,
 	NONE_TYPE_ID,
 	TYPE_TYPE_ID,
-	OPAQUE_TYPE_ID,
 	BOOL_TYPE_ID,
 	LONG_TYPE_ID,
 	TUPLE_TYPE_ID,
@@ -79,13 +81,14 @@ struct TypeHandler {
 
 int instance_init() noexcept;
 std::unordered_set<PeerObject *> &instance_peers() noexcept;
+std::unordered_map<std::string, PyTypeObject *> &instance_opaque_types() noexcept;
 
 void allocator_init() noexcept;
 
 int peer_type_init() noexcept;
 void peers_touch(PyObject *object) noexcept;
 
-int opaque_type_init() noexcept;
+PyTypeObject *opaque_type_for_name(const std::string &name) noexcept;
 
 void list_py_type_init() noexcept;
 
@@ -97,17 +100,15 @@ bool builtin_check(PyObject *object) noexcept;
 
 const TypeHandler *type_handler_for_object(PyObject *object) noexcept;
 const TypeHandler *type_handler_for_id(int32_t type_id) noexcept;
-PyTypeObject *type_object_for_id(int32_t type_id) noexcept;
 
 int marshal(PeerObject &peer, PyObject *bytearray, PyObject *object) noexcept;
 PyObject *unmarshal(PeerObject &peer, const void *data, Py_ssize_t size) noexcept;
 
 extern PyTypeObject peer_type;
-extern PyTypeObject opaque_type;
 
+extern const TypeHandler opaque_type_handler;
 extern const TypeHandler none_type_handler;
 extern const TypeHandler type_type_handler;
-extern const TypeHandler opaque_type_handler;
 extern const TypeHandler bool_type_handler;
 extern const TypeHandler long_type_handler;
 extern const TypeHandler tuple_type_handler;
