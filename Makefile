@@ -1,9 +1,13 @@
 -include config.make
 
-PYTHON	:= python3.4
+PYTHON		:= python3.4
+PYFLAKES	:= pyflakes3
 
 build::
 	$(PYTHON) setup.py build_ext -i -f
+
+check:: build
+	$(PYFLAKES) tap *.py
 
 test:: build
 	PYTHONASYNCIODEBUG=1 $(PYTHON) test.py

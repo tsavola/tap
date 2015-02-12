@@ -30,6 +30,20 @@ def test_server():
 
 					log.info("server: received object from client")
 
+					f = obj[3][0]
+					print("dir(f) =", dir(f))
+					print("f.f_back =", f.f_back)
+					print("f.f_builtins =", f.f_builtins)
+					print("f.f_code =", f.f_code)
+					print("f.f_globals.keys() =", f.f_globals.keys())
+					for key, value in f.f_globals.items():
+						print("f_globals: key =", key)
+						print("f_globals: value =", value)
+					print("f.f_lasti =", f.f_lasti)
+					print("f.f_lineno =", f.f_lineno)
+					print("f.f_locals =", f.f_locals)
+					print("f.f_trace =", f.f_trace)
+
 					func = obj[0]
 					func(obj)
 
@@ -59,6 +73,8 @@ def test_client():
 		print("refcount:", getrefcount(None))
 
 	loop = asyncio.get_event_loop()
+	import time
+	time.sleep(1)
 	reader, writer = loop.run_until_complete(asyncio.open_unix_connection("socket"))
 
 	log.info("client: connected to server")
