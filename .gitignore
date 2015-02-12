@@ -1,4 +1,4 @@
 *.py[co]
 *.so
 /build
-/config.mk
+/config.make

@@ -1,4 +1,4 @@
--include config.mk
+-include config.make
 
 PYTHON	:= python3.4
 
