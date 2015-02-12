@@ -32,6 +32,7 @@ enum TypeId {
 	MODULE_TYPE_ID,
 	BUILTIN_TYPE_ID,
 	FRAME_TYPE_ID,
+	GEN_TYPE_ID,
 
 	TYPE_ID_COUNT
 };
@@ -121,6 +122,7 @@ extern const TypeHandler function_type_handler;
 extern const TypeHandler module_type_handler;
 extern const TypeHandler builtin_type_handler;
 extern const TypeHandler frame_type_handler;
+extern const TypeHandler gen_type_handler;
 
 } // namespace tap
 

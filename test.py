@@ -30,19 +30,19 @@ def test_server():
 
 					log.info("server: received object from client")
 
-					f = obj[3][0]
-					print("dir(f) =", dir(f))
-					print("f.f_back =", f.f_back)
-					print("f.f_builtins =", f.f_builtins)
-					print("f.f_code =", f.f_code)
-					print("f.f_globals.keys() =", f.f_globals.keys())
-					for key, value in f.f_globals.items():
-						print("f_globals: key =", key)
-						print("f_globals: value =", value)
-					print("f.f_lasti =", f.f_lasti)
-					print("f.f_lineno =", f.f_lineno)
-					print("f.f_locals =", f.f_locals)
-					print("f.f_trace =", f.f_trace)
+					g = obj[3][0]
+					print("dir(g) =", dir(g))
+					print("g.gi_code =", g.gi_code)
+					print("g.gi_frame =", g.gi_frame)
+					print("g.gi_running =", g.gi_running)
+					print("g.send =", g.send)
+					print("g.throw =", g.throw)
+					print("repr(g) =", repr(g))
+
+					print("GEN BEGIN")
+					for x in g:
+						print("GEN:", x)
+					print("GEN END")
 
 					func = obj[0]
 					func(obj)
@@ -85,7 +85,8 @@ def test_client():
 		m = {"foo": "bar"}
 		t = (5435452652, m)
 		l = [54325235, 9, t, 765376542, None, 9]
-		obj = (func, sys.stdout, l, (1324, 5435432, t, None), sys.getrefcount)
+		g = generate_nothing()
+		obj = (func, sys.stdout, l, (g, 1324, 5435432, t, None), sys.getrefcount)
 
 		loop.run_until_complete(conn.send(obj))
 
@@ -114,6 +115,11 @@ def test_client():
 		assert l is l2
 
 	log.info("client: connection closed")
+
+def generate_nothing():
+	yield 1
+	yield 2
+	yield 3
 
 def main():
 	procs = []

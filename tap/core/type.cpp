@@ -21,6 +21,7 @@ const TypeHandler *type_handler_for_object(PyObject *object) noexcept
 	if (type == &PyModule_Type) return &module_type_handler;
 	if (type == &PyCFunction_Type && builtin_check(object)) return &builtin_type_handler;
 	if (type == &PyFrame_Type) return &frame_type_handler;
+	if (type == &PyGen_Type) return &gen_type_handler;
 
 	return &opaque_type_handler;
 }
@@ -44,6 +45,7 @@ const TypeHandler *type_handler_for_id(int32_t type_id) noexcept
 		case MODULE_TYPE_ID: return &module_type_handler;
 		case BUILTIN_TYPE_ID: return &builtin_type_handler;
 		case FRAME_TYPE_ID: return &frame_type_handler;
+		case GEN_TYPE_ID: return &gen_type_handler;
 
 		case TYPE_ID_COUNT: break;
 		}
@@ -138,6 +140,7 @@ static PyObject *type_unmarshal_alloc(const void *data, Py_ssize_t size, PeerObj
 		case MODULE_TYPE_ID: type = &PyModule_Type; break;
 		case BUILTIN_TYPE_ID: type = &PyCFunction_Type; break;
 		case FRAME_TYPE_ID: type = &PyFrame_Type; break;
+		case GEN_TYPE_ID: type = &PyGen_Type; break;
 
 		case TYPE_ID_COUNT: break;
 		}
