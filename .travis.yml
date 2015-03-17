@@ -1,5 +1,8 @@
 language: python
 python:
   - "3.4"
+before_install:
+  - sudo apt-get update -q
+  - sudo apt-get install -y libboost-dev
 install: "python setup.py install"
 script: "mkdir tmp && cp test.py tmp/ && cd tmp && python test.py"
