@@ -1,0 +1,6 @@
+[submodule "boost/core"]
+	path = boost/core
+	url = https://github.com/boostorg/core.git
+[submodule "boost/endian"]
+	path = boost/endian
+	url = https://github.com/boostorg/endian.git

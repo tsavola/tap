@@ -10,6 +10,8 @@ setup(
 		Extension(
 			"tap/core",
 			extra_compile_args = [
+				"-Iboost/core/include",
+				"-Iboost/endian/include",
 				"-Wextra",
 				"-Wno-missing-field-initializers",
 				"-Wno-unused-parameter",
